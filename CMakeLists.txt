@@ -22,6 +22,7 @@ add_executable(dusk_catchers
     src/Critter.cpp
     src/LightString.cpp
     src/Firefly.cpp
+    src/Lantern.cpp
 )
 target_link_libraries(dusk_catchers PRIVATE raylib)
 

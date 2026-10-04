@@ -4,10 +4,11 @@
 
 #include "Critter.h"
 #include "Firefly.h"
+#include "Lantern.h"
 #include "LightString.h"
 
-// Owns everything in the game. main() calls update() then draw() once per frame.
-// Lanterns will become members of this class in a later milestone.
+// Owns everything in the game and keeps score. main() calls update() then
+// draw() once per frame.
 class Game {
 public:
     Game();
@@ -18,8 +19,15 @@ public:
     void draw();
 
 private:
+    void spawnFirefly();
+    void deliverToLanterns();
+
     Critter critter1;
     Critter critter2;
     std::vector<Firefly> fireflies;
     LightString lightString; // must come after the critters and fireflies it refers to
+    std::vector<Lantern> lanterns;
+
+    int score;
+    int biggestDelivery;
 };
