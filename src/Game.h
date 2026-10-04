@@ -21,5 +21,5 @@ private:
     Critter critter1;
     Critter critter2;
     std::vector<Firefly> fireflies;
-    LightString lightString; // must come after the critters it refers to
+    LightString lightString; // must come after the critters and fireflies it refers to
 };
