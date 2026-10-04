@@ -93,7 +93,7 @@ The string does most of the work: it reads the critters' positions, picks up any
 
 Plan on roughly 5 to 7 weeks of part-time work; milestones 1 to 3 fit in a weekend. Each one ends with something playable, so commit to git every time one works.
 
-- [ ] **1. Window on screen.** CMake builds the project and raylib opens a dark 960×540 window. Done when it runs on the Mac.
+- [x] **1. Window on screen.** CMake builds the project and raylib opens a dark 960×540 window. Done when it runs on the Mac.
 - [ ] **2. Two critters move.** WASD and the arrow keys move two circles at a frame-rate-independent speed. Done when both move smoothly and stay on screen.
 - [ ] **3. Gather and carry.** The glowing line joins the critters, common fireflies drift, and any firefly the string touches clings to it. Done when fireflies stay on the string as it moves and stretches.
 - [ ] **4. Deliver and light up.** Lanterns to deliver to, a 3-minute timer, a darkening sky, and a results screen showing the lit village. Done when a friend can play start to finish without explanation.
