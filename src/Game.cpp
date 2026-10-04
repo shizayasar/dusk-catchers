@@ -1,12 +1,19 @@
 #include "Game.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "raylib.h"
 
 namespace {
-// Deep dusk blue. Later the sky will fade from purple to navy over the round.
-const Color SKY_COLOR = {24, 28, 58, 255};
+const float ROUND_LENGTH = 180.0f; // seconds from sunset to full dark
+
+// The sky fades from the first color to the second over the round.
+const Color SUNSET_SKY_COLOR = {72, 52, 104, 255}; // dusky purple
+const Color NIGHT_SKY_COLOR = {12, 14, 36, 255};   // deep navy
+
+const int HUD_FONT_SIZE = 20;
+const Color HUD_TEXT_COLOR = {255, 245, 225, 180}; // soft, slightly see-through white
 
 const Color CRITTER1_COLOR = {240, 170, 190, 255}; // soft pink
 const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
@@ -36,6 +43,7 @@ Game::Game()
     : critter1({320.0f, 270.0f}, CRITTER1_COLOR, {KEY_W, KEY_S, KEY_A, KEY_D}),
       critter2({640.0f, 270.0f}, CRITTER2_COLOR, {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT}),
       lightString(critter1, critter2, fireflies),
+      timeLeft(ROUND_LENGTH),
       score(0),
       biggestDelivery(0)
 {
@@ -49,6 +57,8 @@ Game::Game()
 
 void Game::update(float dt)
 {
+    timeLeft = std::max(0.0f, timeLeft - dt);
+
     critter1.update(dt);
     critter2.update(dt);
     for (Firefly& firefly : fireflies) {
@@ -68,7 +78,9 @@ void Game::update(float dt)
 
 void Game::draw()
 {
-    ClearBackground(SKY_COLOR);
+    float progress = 1.0f - timeLeft / ROUND_LENGTH; // 0 at sunset, 1 at full dark
+    ClearBackground(ColorLerp(SUNSET_SKY_COLOR, NIGHT_SKY_COLOR, progress));
+
     for (const Lantern& lantern : lanterns) {
         lantern.draw();
     }
@@ -78,6 +90,8 @@ void Game::draw()
     }
     critter1.draw();
     critter2.draw();
+
+    drawHud();
 }
 
 void Game::spawnFirefly()
@@ -102,4 +116,15 @@ void Game::deliverToLanterns()
             biggestDelivery = std::max(biggestDelivery, delivered);
         }
     }
+}
+
+void Game::drawHud() const
+{
+    DrawText(TextFormat("Score %d", score), 16, 12, HUD_FONT_SIZE, HUD_TEXT_COLOR);
+
+    // Round up so the clock shows 0:00 only once time has truly run out.
+    int secondsLeft = (int)std::ceil(timeLeft);
+    const char* clock = TextFormat("%d:%02d", secondsLeft / 60, secondsLeft % 60);
+    int clockWidth = MeasureText(clock, HUD_FONT_SIZE);
+    DrawText(clock, (GetScreenWidth() - clockWidth) / 2, 12, HUD_FONT_SIZE, HUD_TEXT_COLOR);
 }
