@@ -16,7 +16,7 @@ const int SPAWN_MARGIN = 40; // keep new fireflies away from the screen edges
 Game::Game()
     : critter1({320.0f, 270.0f}, CRITTER1_COLOR, {KEY_W, KEY_S, KEY_A, KEY_D}),
       critter2({640.0f, 270.0f}, CRITTER2_COLOR, {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT}),
-      lightString(critter1, critter2)
+      lightString(critter1, critter2, fireflies)
 {
     for (int i = 0; i < FIREFLY_COUNT; i++) {
         Vector2 spawn = {
@@ -34,7 +34,9 @@ void Game::update(float dt)
     for (Firefly& firefly : fireflies) {
         firefly.update(dt);
     }
-    lightString.update(dt); // after the critters, so it reads where they are now
+    // Last, so it sees where everything is now and has the final say on where
+    // carried fireflies sit.
+    lightString.update(dt);
 }
 
 void Game::draw()

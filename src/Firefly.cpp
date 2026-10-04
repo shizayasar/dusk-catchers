@@ -25,13 +25,19 @@ Firefly::Firefly(Vector2 startPosition)
     : position(startPosition),
       heading(randomFloat(0.0f, 2.0f * PI)),
       turnRate(0.0f),
-      turnTimer(0.0f)
+      turnTimer(0.0f),
+      clinging(false),
+      stringT(0.0f)
 {
     pickNewTurnRate();
 }
 
 void Firefly::update(float dt)
 {
+    if (clinging) {
+        return; // the string carries us; see followString()
+    }
+
     // Flying forward while turning steadily traces a circle; changing the turn
     // rate now and then makes the loops wander instead of repeating forever.
     turnTimer -= dt;
@@ -51,6 +57,19 @@ void Firefly::draw() const
 {
     DrawCircleV(position, HALO_RADIUS, HALO_COLOR);
     DrawCircleV(position, RADIUS, CORE_COLOR);
+}
+
+void Firefly::clingAt(float t)
+{
+    clinging = true;
+    stringT = t;
+}
+
+void Firefly::followString(Vector2 stringStart, Vector2 stringEnd)
+{
+    // Keeping the same fraction t means we slide apart as the string stretches
+    // and swing along when it turns.
+    position = Vector2Lerp(stringStart, stringEnd, stringT);
 }
 
 void Firefly::pickNewTurnRate()
