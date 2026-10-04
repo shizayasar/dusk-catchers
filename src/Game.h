@@ -21,6 +21,7 @@ public:
 private:
     void spawnFirefly();
     void deliverToLanterns();
+    void drawHud() const;
 
     Critter critter1;
     Critter critter2;
@@ -28,6 +29,7 @@ private:
     LightString lightString; // must come after the critters and fireflies it refers to
     std::vector<Lantern> lanterns;
 
+    float timeLeft; // seconds until full dark
     int score;
     int biggestDelivery;
 };
