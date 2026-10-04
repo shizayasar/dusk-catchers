@@ -7,8 +7,8 @@
 #include "Lantern.h"
 #include "LightString.h"
 
-// Owns everything in the game and keeps score. main() calls update() then
-// draw() once per frame.
+// Owns everything in the game, keeps score and switches between screens.
+// main() calls update() then draw() once per frame.
 class Game {
 public:
     Game();
@@ -19,9 +19,17 @@ public:
     void draw();
 
 private:
+    // Which screen is showing. Title and evening select will join these later.
+    enum class Screen { Playing, Results };
+
+    void startRound();
+    void updatePlaying(float dt);
+    void drawPlaying() const;
+    void drawResults() const;
+    void drawHud() const;
     void spawnFirefly();
     void deliverToLanterns();
-    void drawHud() const;
+    int countLitLanterns() const;
 
     Critter critter1;
     Critter critter2;
@@ -29,6 +37,7 @@ private:
     LightString lightString; // must come after the critters and fireflies it refers to
     std::vector<Lantern> lanterns;
 
+    Screen screen;
     float timeLeft; // seconds until full dark
     int score;
     int biggestDelivery;
