@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Critter.h"
+#include "LightString.h"
 
 // Owns everything in the game. main() calls update() then draw() once per frame.
 // Fireflies and lanterns will become members of this class in later milestones.
@@ -16,4 +17,5 @@ public:
 private:
     Critter critter1;
     Critter critter2;
+    LightString lightString; // must come after the critters it refers to
 };

@@ -12,7 +12,8 @@ const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
 
 Game::Game()
     : critter1({320.0f, 270.0f}, CRITTER1_COLOR, {KEY_W, KEY_S, KEY_A, KEY_D}),
-      critter2({640.0f, 270.0f}, CRITTER2_COLOR, {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT})
+      critter2({640.0f, 270.0f}, CRITTER2_COLOR, {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT}),
+      lightString(critter1, critter2)
 {
 }
 
@@ -20,11 +21,13 @@ void Game::update(float dt)
 {
     critter1.update(dt);
     critter2.update(dt);
+    lightString.update(dt); // after the critters, so it reads where they are now
 }
 
 void Game::draw()
 {
     ClearBackground(SKY_COLOR);
+    lightString.draw(); // drawn first so the critters sit on top of its ends
     critter1.draw();
     critter2.draw();
 }

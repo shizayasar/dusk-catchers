@@ -19,6 +19,8 @@ public:
     void update(float dt);
     void draw() const;
 
+    Vector2 getPosition() const { return position; }
+
 private:
     Vector2 position;
     Color color;
