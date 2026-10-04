@@ -15,4 +15,5 @@ public:
 
 private:
     Critter critter1;
+    Critter critter2;
 };

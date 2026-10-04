@@ -7,20 +7,24 @@ namespace {
 const Color SKY_COLOR = {24, 28, 58, 255};
 
 const Color CRITTER1_COLOR = {240, 170, 190, 255}; // soft pink
+const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
 }
 
 Game::Game()
-    : critter1({320.0f, 270.0f}, CRITTER1_COLOR, {KEY_W, KEY_S, KEY_A, KEY_D})
+    : critter1({320.0f, 270.0f}, CRITTER1_COLOR, {KEY_W, KEY_S, KEY_A, KEY_D}),
+      critter2({640.0f, 270.0f}, CRITTER2_COLOR, {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT})
 {
 }
 
 void Game::update(float dt)
 {
     critter1.update(dt);
+    critter2.update(dt);
 }
 
 void Game::draw()
 {
     ClearBackground(SKY_COLOR);
     critter1.draw();
+    critter2.draw();
 }

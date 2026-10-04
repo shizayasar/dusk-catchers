@@ -26,6 +26,10 @@ void Critter::update(float dt)
 
     // Scaling by dt makes the speed the same in pixels per second at any frame rate.
     position = Vector2Add(position, Vector2Scale(direction, SPEED * dt));
+
+    // Keep the whole circle on screen, not just its center.
+    position.x = Clamp(position.x, RADIUS, GetScreenWidth() - RADIUS);
+    position.y = Clamp(position.y, RADIUS, GetScreenHeight() - RADIUS);
 }
 
 void Critter::draw() const
