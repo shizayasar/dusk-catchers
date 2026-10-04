@@ -43,16 +43,47 @@ void LightString::update(float dt)
 
     for (Firefly& firefly : fireflies) {
         if (!firefly.isClinging()) {
-            float t = closestFractionAlong(firefly.getPosition(), start, end);
-            Vector2 closestPoint = Vector2Lerp(start, end, t);
-            if (Vector2Distance(firefly.getPosition(), closestPoint) <= CATCH_DISTANCE) {
-                firefly.clingAt(t);
+            if (touches(firefly.getPosition(), CATCH_DISTANCE)) {
+                firefly.clingAt(closestFractionAlong(firefly.getPosition(), start, end));
             }
         }
         if (firefly.isClinging()) {
             firefly.followString(start, end);
         }
     }
+}
+
+int LightString::getLoadSize() const
+{
+    int count = 0;
+    for (const Firefly& firefly : fireflies) {
+        if (firefly.isClinging()) {
+            count++;
+        }
+    }
+    return count;
+}
+
+bool LightString::touches(Vector2 center, float radius) const
+{
+    float t = closestFractionAlong(center, start, end);
+    Vector2 closestPoint = Vector2Lerp(start, end, t);
+    return Vector2Distance(center, closestPoint) <= radius;
+}
+
+int LightString::deliverLoad()
+{
+    int delivered = 0;
+    // Only step forward when we keep a firefly: erasing shifts the next one into slot i.
+    for (size_t i = 0; i < fireflies.size();) {
+        if (fireflies[i].isClinging()) {
+            fireflies.erase(fireflies.begin() + i);
+            delivered++;
+        } else {
+            i++;
+        }
+    }
+    return delivered;
 }
 
 void LightString::draw() const
