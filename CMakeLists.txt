@@ -20,6 +20,7 @@ add_executable(dusk_catchers
     src/main.cpp
     src/Game.cpp
     src/Critter.cpp
+    src/LightString.cpp
 )
 target_link_libraries(dusk_catchers PRIVATE raylib)
 
