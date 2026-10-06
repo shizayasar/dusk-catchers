@@ -34,6 +34,9 @@ const ControlKeys CRITTER1_KEYS = {KEY_W, KEY_S, KEY_A, KEY_D};
 const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 
 const int FIREFLY_COUNT = 12; // delivered fireflies are replaced to keep this many
+// Chance out of 100 that a new firefly is shy rather than common. Milestone 6
+// will move the mix into each evening's data file.
+const int SHY_CHANCE = 35;
 
 // Fireflies spawn in the meadow (left side); the village is on the right.
 const int MEADOW_LEFT = 40;
@@ -138,7 +141,7 @@ void Game::updatePlaying(float dt)
     critter1.update(dt);
     critter2.update(dt);
     for (Firefly& firefly : fireflies) {
-        firefly.update(dt);
+        firefly.update(dt, critter1.getPosition(), critter2.getPosition());
     }
     // Last, so it sees where everything is now and has the final say on where
     // carried fireflies sit.
@@ -224,7 +227,9 @@ void Game::spawnFirefly()
         (float)GetRandomValue(MEADOW_LEFT, MEADOW_RIGHT),
         (float)GetRandomValue(MEADOW_TOP, MEADOW_BOTTOM),
     };
-    fireflies.push_back(Firefly(spawn));
+    Firefly::Kind kind = GetRandomValue(1, 100) <= SHY_CHANCE ? Firefly::Kind::Shy
+                                                               : Firefly::Kind::Common;
+    fireflies.push_back(Firefly(kind, spawn));
 }
 
 void Game::deliverToLanterns()
