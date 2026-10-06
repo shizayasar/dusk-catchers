@@ -18,7 +18,7 @@ const float SHAKE_PER_PULL_SPEED = 1.0f / 250.0f; // meter per second, per px/s 
 const float SHAKE_PER_STRETCH = 1.0f / 40.0f;     // meter per second, per pixel over max length
 const float CALM_DOWN_RATE = 0.6f;        // meter drained per second while not strained
 const float WARNING_LEVEL = 0.35f;        // above this, the string flickers
-const float LEVEL_AFTER_DROP = 0.75f;     // after a drop, the meter falls back to here
+const float RELIEF_AFTER_DROP = 0.25f;    // after a drop, the meter falls back this much
 const float FLICKER_SPEED = 30.0f;        // how fast the warning flicker pulses
 const float FLICKER_DIMMING = 0.7f;       // how dark the flicker gets at its deepest
 
@@ -107,27 +107,28 @@ void LightString::updateShake(float dt)
     }
     shake = Clamp(shake, 0.0f, 1.0f);
 
-    if (shake >= 1.0f) {
-        dropOneFirefly();
-        // Falling back only partway means continued rough handling drops
-        // fireflies one by one, a moment apart, rather than all at once.
-        shake = LEVEL_AFTER_DROP;
-    }
+    dropLooseFirefly();
 }
 
-void LightString::dropOneFirefly()
+void LightString::dropLooseFirefly()
 {
-    std::vector<int> carried;
+    // Any carried firefly whose grip the meter has reached may fall. Most have a
+    // grip of 1 (a full meter); fragile kinds slip off sooner.
+    std::vector<int> loose;
     for (int i = 0; i < (int)fireflies.size(); i++) {
-        if (fireflies[i]->isClinging()) {
-            carried.push_back(i);
+        if (fireflies[i]->isClinging() && shake >= fireflies[i]->getGrip()) {
+            loose.push_back(i);
         }
     }
-    if (carried.empty()) {
+    if (loose.empty()) {
         return;
     }
-    int pick = carried[GetRandomValue(0, (int)carried.size() - 1)];
+    int pick = loose[GetRandomValue(0, (int)loose.size() - 1)];
     fireflies[pick]->letGo();
+
+    // Easing off only partway means continued rough handling drops fireflies
+    // one by one, a moment apart, rather than all at once.
+    shake -= RELIEF_AFTER_DROP;
 }
 
 int LightString::getLoadSize() const

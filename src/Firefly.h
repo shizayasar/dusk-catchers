@@ -21,6 +21,10 @@ public:
 
     // How many fireflies this counts as in a load.
     virtual int getCount() const { return 1; }
+    // How full the string's shake meter (0 to 1) can get before we fall off.
+    virtual float getGrip() const { return 1.0f; }
+    // Lets Game keep golden fireflies to one at a time.
+    virtual bool isGolden() const { return false; }
     // Cling to the string if it touches us the way our kind needs.
     virtual void tryToCling(const LightString& string);
     // Move to our spot on the string, wherever its ends are now.

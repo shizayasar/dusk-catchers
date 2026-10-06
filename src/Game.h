@@ -30,6 +30,7 @@ private:
     void drawHud() const;
     void drawControlsHint() const;
     void spawnFirefly();
+    void updateGoldenSpawning(float dt);
     void deliverToLanterns();
     int countLitLanterns() const;
 
@@ -45,4 +46,5 @@ private:
     float timeLeft; // seconds until full dark
     int score;
     int biggestDelivery;
+    float stillTimer; // how long both critters have been standing still
 };

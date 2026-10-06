@@ -4,9 +4,11 @@
 #include <cmath>
 
 #include "CommonFirefly.h"
+#include "GoldenFirefly.h"
 #include "PairFirefly.h"
 #include "ShyFirefly.h"
 #include "raylib.h"
+#include "raymath.h"
 
 namespace {
 const float ROUND_LENGTH = 180.0f; // seconds from sunset to full dark
@@ -41,6 +43,11 @@ const int FIREFLY_COUNT = 12; // delivered fireflies are replaced to keep this m
 // Milestone 6 will move the mix into each evening's data file.
 const int SHY_CHANCE = 30;
 const int PAIR_CHANCE = 20;
+
+// A golden firefly appears beside the middle of the string once both critters
+// have stood still this long, if there isn't one out already.
+const float GOLDEN_STILL_TIME = 2.0f;
+const float GOLDEN_SPAWN_OFFSET = 50.0f; // pixels to the side of the string
 
 // Fireflies spawn in the meadow (left side); the village is on the right.
 const int MEADOW_LEFT = 40;
@@ -81,7 +88,8 @@ Game::Game()
       screen(Screen::Playing),
       timeLeft(ROUND_LENGTH),
       score(0),
-      biggestDelivery(0)
+      biggestDelivery(0),
+      stillTimer(0.0f)
 {
     startRound();
 }
@@ -135,6 +143,7 @@ void Game::startRound()
     timeLeft = ROUND_LENGTH;
     score = 0;
     biggestDelivery = 0;
+    stillTimer = 0.0f;
     screen = Screen::Playing;
 }
 
@@ -152,6 +161,7 @@ void Game::updatePlaying(float dt)
     lightString.update(dt);
 
     deliverToLanterns();
+    updateGoldenSpawning(dt);
 
     // Top the meadow back up so there is always something to catch.
     while ((int)fireflies.size() < FIREFLY_COUNT) {
@@ -239,6 +249,38 @@ void Game::spawnFirefly()
     } else {
         fireflies.push_back(std::make_unique<CommonFirefly>(spawn));
     }
+}
+
+void Game::updateGoldenSpawning(float dt)
+{
+    if (critter1.isMoving() || critter2.isMoving()) {
+        stillTimer = 0.0f;
+        return;
+    }
+    stillTimer += dt;
+    if (stillTimer < GOLDEN_STILL_TIME) {
+        return;
+    }
+    stillTimer = 0.0f;
+
+    for (const std::unique_ptr<Firefly>& firefly : fireflies) {
+        if (firefly->isGolden()) {
+            return; // only one at a time
+        }
+    }
+
+    // Beside the middle of the string, so it's clear the pause made it appear,
+    // but not touching it, so it still has to be caught.
+    Vector2 start = critter1.getPosition();
+    Vector2 end = critter2.getPosition();
+    Vector2 middle = Vector2Lerp(start, end, 0.5f);
+    Vector2 along = Vector2Normalize(Vector2Subtract(end, start));
+    Vector2 side = {-along.y, along.x}; // along the string, turned 90 degrees
+    if (side.x == 0.0f && side.y == 0.0f) {
+        side = {0.0f, -1.0f}; // critters on the same spot: just go above them
+    }
+    Vector2 spawn = Vector2Add(middle, Vector2Scale(side, GOLDEN_SPAWN_OFFSET));
+    fireflies.push_back(std::make_unique<GoldenFirefly>(spawn));
 }
 
 void Game::deliverToLanterns()
