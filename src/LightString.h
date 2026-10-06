@@ -22,11 +22,13 @@ public:
     void update(float dt);
     void draw() const;
 
-    // How many fireflies are clinging to the string right now.
+    // How many fireflies are clinging to the string right now (a pair counts as 2).
     int getLoadSize() const;
     // True if any part of the string is within radius of center.
     bool touches(Vector2 center, float radius) const;
-    // Removes every carried firefly from the game and returns how many there were.
+    // How far along the string the point nearest p is, from 0 (first critter) to 1.
+    float fractionAlong(Vector2 p) const;
+    // Removes every carried firefly from the game and returns how many it counted as.
     int deliverLoad();
 
 private:

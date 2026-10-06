@@ -34,9 +34,10 @@ const ControlKeys CRITTER1_KEYS = {KEY_W, KEY_S, KEY_A, KEY_D};
 const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 
 const int FIREFLY_COUNT = 12; // delivered fireflies are replaced to keep this many
-// Chance out of 100 that a new firefly is shy rather than common. Milestone 6
-// will move the mix into each evening's data file.
-const int SHY_CHANCE = 35;
+// Chances out of 100 for each new firefly's kind; the rest are common.
+// Milestone 6 will move the mix into each evening's data file.
+const int SHY_CHANCE = 30;
+const int PAIR_CHANCE = 20;
 
 // Fireflies spawn in the meadow (left side); the village is on the right.
 const int MEADOW_LEFT = 40;
@@ -227,8 +228,13 @@ void Game::spawnFirefly()
         (float)GetRandomValue(MEADOW_LEFT, MEADOW_RIGHT),
         (float)GetRandomValue(MEADOW_TOP, MEADOW_BOTTOM),
     };
-    Firefly::Kind kind = GetRandomValue(1, 100) <= SHY_CHANCE ? Firefly::Kind::Shy
-                                                               : Firefly::Kind::Common;
+    int roll = GetRandomValue(1, 100);
+    Firefly::Kind kind = Firefly::Kind::Common;
+    if (roll <= SHY_CHANCE) {
+        kind = Firefly::Kind::Shy;
+    } else if (roll <= SHY_CHANCE + PAIR_CHANCE) {
+        kind = Firefly::Kind::Pair;
+    }
     fireflies.push_back(Firefly(kind, spawn));
 }
 

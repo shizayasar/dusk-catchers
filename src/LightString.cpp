@@ -9,7 +9,6 @@ const float CORE_THICKNESS = 3.0f;
 const float HALO_THICKNESS = 10.0f;
 const Color CORE_COLOR = {255, 230, 150, 255}; // warm yellow
 const Color HALO_COLOR = {255, 210, 110, 60};  // same hue, mostly transparent
-const float CATCH_DISTANCE = 10.0f; // how close a firefly must be to the string to cling
 
 // Shaking loose. The shake meter runs from 0 (calm) to 1 (a firefly falls off).
 const float MAX_LENGTH = 360.0f;          // pixels; stretching past this strains the string
@@ -69,8 +68,9 @@ void LightString::update(float dt)
     updateShake(dt);
 
     for (Firefly& firefly : fireflies) {
-        if (firefly.canBeCaught() && touches(firefly.getPosition(), CATCH_DISTANCE)) {
-            firefly.clingAt(closestFractionAlong(firefly.getPosition(), start, end));
+        // Each kind decides for itself what counts as being caught.
+        if (firefly.canBeCaught()) {
+            firefly.tryToCling(*this);
         }
         if (firefly.isClinging()) {
             firefly.followString(start, end);
@@ -135,7 +135,7 @@ int LightString::getLoadSize() const
     int count = 0;
     for (const Firefly& firefly : fireflies) {
         if (firefly.isClinging()) {
-            count++;
+            count += firefly.getCount();
         }
     }
     return count;
@@ -148,14 +148,19 @@ bool LightString::touches(Vector2 center, float radius) const
     return Vector2Distance(center, closestPoint) <= radius;
 }
 
+float LightString::fractionAlong(Vector2 p) const
+{
+    return closestFractionAlong(p, start, end);
+}
+
 int LightString::deliverLoad()
 {
     int delivered = 0;
     // Only step forward when we keep a firefly: erasing shifts the next one into slot i.
     for (size_t i = 0; i < fireflies.size();) {
         if (fireflies[i].isClinging()) {
+            delivered += fireflies[i].getCount();
             fireflies.erase(fireflies.begin() + i);
-            delivered++;
         } else {
             i++;
         }
