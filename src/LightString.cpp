@@ -39,7 +39,7 @@ float closestFractionAlong(Vector2 p, Vector2 a, Vector2 b)
 }
 
 LightString::LightString(const Critter& startCritter, const Critter& endCritter,
-                         std::vector<Firefly>& fireflies)
+                         std::vector<std::unique_ptr<Firefly>>& fireflies)
     : startCritter(startCritter),
       endCritter(endCritter),
       fireflies(fireflies),
@@ -67,13 +67,13 @@ void LightString::update(float dt)
 
     updateShake(dt);
 
-    for (Firefly& firefly : fireflies) {
+    for (std::unique_ptr<Firefly>& firefly : fireflies) {
         // Each kind decides for itself what counts as being caught.
-        if (firefly.canBeCaught()) {
-            firefly.tryToCling(*this);
+        if (firefly->canBeCaught()) {
+            firefly->tryToCling(*this);
         }
-        if (firefly.isClinging()) {
-            firefly.followString(start, end);
+        if (firefly->isClinging()) {
+            firefly->followString(start, end);
         }
     }
 }
@@ -119,7 +119,7 @@ void LightString::dropOneFirefly()
 {
     std::vector<int> carried;
     for (int i = 0; i < (int)fireflies.size(); i++) {
-        if (fireflies[i].isClinging()) {
+        if (fireflies[i]->isClinging()) {
             carried.push_back(i);
         }
     }
@@ -127,15 +127,15 @@ void LightString::dropOneFirefly()
         return;
     }
     int pick = carried[GetRandomValue(0, (int)carried.size() - 1)];
-    fireflies[pick].letGo();
+    fireflies[pick]->letGo();
 }
 
 int LightString::getLoadSize() const
 {
     int count = 0;
-    for (const Firefly& firefly : fireflies) {
-        if (firefly.isClinging()) {
-            count += firefly.getCount();
+    for (const std::unique_ptr<Firefly>& firefly : fireflies) {
+        if (firefly->isClinging()) {
+            count += firefly->getCount();
         }
     }
     return count;
@@ -158,8 +158,9 @@ int LightString::deliverLoad()
     int delivered = 0;
     // Only step forward when we keep a firefly: erasing shifts the next one into slot i.
     for (size_t i = 0; i < fireflies.size();) {
-        if (fireflies[i].isClinging()) {
-            delivered += fireflies[i].getCount();
+        if (fireflies[i]->isClinging()) {
+            delivered += fireflies[i]->getCount();
+            // Erasing the unique_ptr also frees the firefly it owns.
             fireflies.erase(fireflies.begin() + i);
         } else {
             i++;

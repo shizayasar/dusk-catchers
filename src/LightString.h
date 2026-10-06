@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "Critter.h"
@@ -13,7 +14,7 @@
 class LightString {
 public:
     LightString(const Critter& startCritter, const Critter& endCritter,
-                std::vector<Firefly>& fireflies);
+                std::vector<std::unique_ptr<Firefly>>& fireflies);
 
     // Forget past movement and calm the string, e.g. when a new round starts and
     // the critters jump back to their start spots.
@@ -37,7 +38,7 @@ private:
 
     const Critter& startCritter;
     const Critter& endCritter;
-    std::vector<Firefly>& fireflies;
+    std::vector<std::unique_ptr<Firefly>>& fireflies;
     Vector2 start;
     Vector2 end;
     Vector2 previousStart; // last frame's ends, used to measure how fast they move
