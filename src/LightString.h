@@ -34,7 +34,7 @@ public:
 
 private:
     void updateShake(float dt);
-    void dropOneFirefly();
+    void dropLooseFirefly();
 
     const Critter& startCritter;
     const Critter& endCritter;

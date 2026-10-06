@@ -20,9 +20,12 @@ public:
     void draw() const;
 
     Vector2 getPosition() const { return position; }
+    // True if the critter moved this frame.
+    bool isMoving() const { return moving; }
 
 private:
     Vector2 position;
     Color color;
     ControlKeys keys;
+    bool moving;
 };
