@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "Critter.h"
@@ -34,7 +35,9 @@ private:
 
     Critter critter1;
     Critter critter2;
-    std::vector<Firefly> fireflies;
+    // Pointers, because each kind is a different subclass with its own size.
+    // unique_ptr owns each firefly and frees it when it's removed from the list.
+    std::vector<std::unique_ptr<Firefly>> fireflies;
     LightString lightString; // must come after the critters and fireflies it refers to
     std::vector<Lantern> lanterns;
 

@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <cmath>
 
+#include "CommonFirefly.h"
+#include "PairFirefly.h"
+#include "ShyFirefly.h"
 #include "raylib.h"
 
 namespace {
@@ -141,8 +144,8 @@ void Game::updatePlaying(float dt)
 
     critter1.update(dt);
     critter2.update(dt);
-    for (Firefly& firefly : fireflies) {
-        firefly.update(dt, critter1.getPosition(), critter2.getPosition());
+    for (std::unique_ptr<Firefly>& firefly : fireflies) {
+        firefly->update(dt, critter1.getPosition(), critter2.getPosition());
     }
     // Last, so it sees where everything is now and has the final say on where
     // carried fireflies sit.
@@ -169,8 +172,8 @@ void Game::drawPlaying() const
         lantern.draw();
     }
     lightString.draw(); // drawn before the critters so they sit on top of its ends
-    for (const Firefly& firefly : fireflies) {
-        firefly.draw();
+    for (const std::unique_ptr<Firefly>& firefly : fireflies) {
+        firefly->draw();
     }
     critter1.draw();
     critter2.draw();
@@ -229,13 +232,13 @@ void Game::spawnFirefly()
         (float)GetRandomValue(MEADOW_TOP, MEADOW_BOTTOM),
     };
     int roll = GetRandomValue(1, 100);
-    Firefly::Kind kind = Firefly::Kind::Common;
     if (roll <= SHY_CHANCE) {
-        kind = Firefly::Kind::Shy;
+        fireflies.push_back(std::make_unique<ShyFirefly>(spawn));
     } else if (roll <= SHY_CHANCE + PAIR_CHANCE) {
-        kind = Firefly::Kind::Pair;
+        fireflies.push_back(std::make_unique<PairFirefly>(spawn));
+    } else {
+        fireflies.push_back(std::make_unique<CommonFirefly>(spawn));
     }
-    fireflies.push_back(Firefly(kind, spawn));
 }
 
 void Game::deliverToLanterns()
