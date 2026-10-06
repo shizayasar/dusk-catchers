@@ -21,6 +21,11 @@ const Color RESULTS_TITLE_COLOR = {255, 220, 150, 255}; // warm lantern yellow
 const Color RESULTS_TEXT_COLOR = {255, 245, 225, 230};
 const Color RESULTS_HINT_COLOR = {255, 245, 225, 140};
 
+// Each critter's keys are shown under it at the start of a round, then fade out.
+const float CONTROLS_HINT_SHOW_TIME = 5.0f; // seconds fully visible
+const float CONTROLS_HINT_FADE_TIME = 1.5f; // seconds to fade away after that
+const float CONTROLS_HINT_OFFSET = 28.0f;   // pixels below the critter's center
+
 const Vector2 CRITTER1_START = {320.0f, 270.0f};
 const Vector2 CRITTER2_START = {640.0f, 270.0f};
 const Color CRITTER1_COLOR = {240, 170, 190, 255}; // soft pink
@@ -46,6 +51,13 @@ const Vector2 LANTERN_POSITIONS[] = {
 int pointsForDelivery(int fireflyCount)
 {
     return fireflyCount * (fireflyCount + 1) / 2;
+}
+
+void drawTextBelow(const char* text, Vector2 position, Color color)
+{
+    int width = MeasureText(text, HUD_FONT_SIZE);
+    DrawText(text, (int)position.x - width / 2, (int)(position.y + CONTROLS_HINT_OFFSET),
+             HUD_FONT_SIZE, color);
 }
 
 void drawCenteredText(const char* text, int y, int fontSize, Color color)
@@ -156,6 +168,7 @@ void Game::drawPlaying() const
     critter1.draw();
     critter2.draw();
 
+    drawControlsHint();
     drawHud();
 }
 
@@ -185,6 +198,21 @@ void Game::drawHud() const
     int secondsLeft = (int)std::ceil(timeLeft);
     drawCenteredText(TextFormat("%d:%02d", secondsLeft / 60, secondsLeft % 60),
                      12, HUD_FONT_SIZE, HUD_TEXT_COLOR);
+}
+
+void Game::drawControlsHint() const
+{
+    // 1 while fully visible, then falling to 0 over the fade time.
+    float elapsed = ROUND_LENGTH - timeLeft;
+    float alpha = 1.0f - (elapsed - CONTROLS_HINT_SHOW_TIME) / CONTROLS_HINT_FADE_TIME;
+    alpha = std::clamp(alpha, 0.0f, 1.0f);
+    if (alpha <= 0.0f) {
+        return;
+    }
+
+    // Drawn in each critter's own color, so it's clear which keys move which one.
+    drawTextBelow("WASD", critter1.getPosition(), Fade(CRITTER1_COLOR, alpha));
+    drawTextBelow("Arrow keys", critter2.getPosition(), Fade(CRITTER2_COLOR, alpha));
 }
 
 void Game::spawnFirefly()

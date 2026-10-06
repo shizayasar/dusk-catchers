@@ -27,6 +27,7 @@ private:
     void drawPlaying() const;
     void drawResults() const;
     void drawHud() const;
+    void drawControlsHint() const;
     void spawnFirefly();
     void deliverToLanterns();
     int countLitLanterns() const;

@@ -61,7 +61,7 @@ Co-op and solo use the same keys, so solo is simply one person steering both cri
 | Co-op, gamepads | Gamepad 1 left stick | Gamepad 2 left stick | Standard |
 | Solo, both hands | WASD | Arrow keys | Longer string, fireflies cling more tightly |
 
-Enter starts a round and Esc pauses. Browsers only detect a gamepad after a button press, so the title screen says "Press any button to join." Solo matters most for the portfolio, since most visitors will play alone.
+Enter starts a round and Esc pauses. For the first few seconds of each round, each critter's keys are shown beneath it and then fade out. Browsers only detect a gamepad after a button press, so the title screen says "Press any button to join." Solo matters most for the portfolio, since most visitors will play alone.
 
 ## Look, feel and sound
 
