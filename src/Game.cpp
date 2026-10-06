@@ -111,6 +111,9 @@ void Game::startRound()
     // The string keeps working because it refers to these same two members.
     critter1 = Critter(CRITTER1_START, CRITTER1_COLOR, CRITTER1_KEYS);
     critter2 = Critter(CRITTER2_START, CRITTER2_COLOR, CRITTER2_KEYS);
+    // The critters just jumped back to their start spots; don't let the string
+    // mistake that for a violent yank.
+    lightString.reset();
 
     fireflies.clear();
     for (int i = 0; i < FIREFLY_COUNT; i++) {

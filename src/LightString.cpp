@@ -1,5 +1,7 @@
 #include "LightString.h"
 
+#include <cmath>
+
 #include "raymath.h"
 
 namespace {
@@ -8,6 +10,18 @@ const float HALO_THICKNESS = 10.0f;
 const Color CORE_COLOR = {255, 230, 150, 255}; // warm yellow
 const Color HALO_COLOR = {255, 210, 110, 60};  // same hue, mostly transparent
 const float CATCH_DISTANCE = 10.0f; // how close a firefly must be to the string to cling
+
+// Shaking loose. The shake meter runs from 0 (calm) to 1 (a firefly falls off).
+const float MAX_LENGTH = 360.0f;          // pixels; stretching past this strains the string
+const float SAFE_PULL_SPEED = 250.0f;     // how fast the ends may move apart from each other
+                                          // (pixels per second) before it counts as yanking
+const float SHAKE_PER_PULL_SPEED = 1.0f / 250.0f; // meter per second, per px/s over the limit
+const float SHAKE_PER_STRETCH = 1.0f / 40.0f;     // meter per second, per pixel over max length
+const float CALM_DOWN_RATE = 0.6f;        // meter drained per second while not strained
+const float WARNING_LEVEL = 0.35f;        // above this, the string flickers
+const float LEVEL_AFTER_DROP = 0.75f;     // after a drop, the meter falls back to here
+const float FLICKER_SPEED = 30.0f;        // how fast the warning flicker pulses
+const float FLICKER_DIMMING = 0.7f;       // how dark the flicker gets at its deepest
 
 // Returns how far along the segment from a to b the point closest to p lies,
 // from 0 (at a) to 1 (at b). This is the heart of the line-vs-circle test.
@@ -31,26 +45,89 @@ LightString::LightString(const Critter& startCritter, const Critter& endCritter,
       endCritter(endCritter),
       fireflies(fireflies),
       start(startCritter.getPosition()),
-      end(endCritter.getPosition())
+      end(endCritter.getPosition()),
+      previousStart(start),
+      previousEnd(end),
+      shake(0.0f)
 {
+}
+
+void LightString::reset()
+{
+    start = previousStart = startCritter.getPosition();
+    end = previousEnd = endCritter.getPosition();
+    shake = 0.0f;
 }
 
 void LightString::update(float dt)
 {
-    (void)dt; // will be used to measure how fast the string moves (milestone 5)
+    previousStart = start;
+    previousEnd = end;
     start = startCritter.getPosition();
     end = endCritter.getPosition();
 
+    updateShake(dt);
+
     for (Firefly& firefly : fireflies) {
-        if (!firefly.isClinging()) {
-            if (touches(firefly.getPosition(), CATCH_DISTANCE)) {
-                firefly.clingAt(closestFractionAlong(firefly.getPosition(), start, end));
-            }
+        if (firefly.canBeCaught() && touches(firefly.getPosition(), CATCH_DISTANCE)) {
+            firefly.clingAt(closestFractionAlong(firefly.getPosition(), start, end));
         }
         if (firefly.isClinging()) {
             firefly.followString(start, end);
         }
     }
+}
+
+void LightString::updateShake(float dt)
+{
+    if (dt <= 0.0f) {
+        return; // no time passed, so no speed to measure
+    }
+
+    // If both ends move the same way the string is simply being carried. The
+    // difference between their velocities is how hard it's being pulled apart
+    // or swung around.
+    Vector2 startVelocity = Vector2Scale(Vector2Subtract(start, previousStart), 1.0f / dt);
+    Vector2 endVelocity = Vector2Scale(Vector2Subtract(end, previousEnd), 1.0f / dt);
+    float pullSpeed = Vector2Length(Vector2Subtract(startVelocity, endVelocity));
+    float overStretch = Vector2Distance(start, end) - MAX_LENGTH;
+
+    float strain = 0.0f;
+    if (pullSpeed > SAFE_PULL_SPEED) {
+        strain += (pullSpeed - SAFE_PULL_SPEED) * SHAKE_PER_PULL_SPEED;
+    }
+    if (overStretch > 0.0f) {
+        strain += overStretch * SHAKE_PER_STRETCH;
+    }
+
+    if (strain > 0.0f) {
+        shake += strain * dt;
+    } else {
+        shake -= CALM_DOWN_RATE * dt;
+    }
+    shake = Clamp(shake, 0.0f, 1.0f);
+
+    if (shake >= 1.0f) {
+        dropOneFirefly();
+        // Falling back only partway means continued rough handling drops
+        // fireflies one by one, a moment apart, rather than all at once.
+        shake = LEVEL_AFTER_DROP;
+    }
+}
+
+void LightString::dropOneFirefly()
+{
+    std::vector<int> carried;
+    for (int i = 0; i < (int)fireflies.size(); i++) {
+        if (fireflies[i].isClinging()) {
+            carried.push_back(i);
+        }
+    }
+    if (carried.empty()) {
+        return;
+    }
+    int pick = carried[GetRandomValue(0, (int)carried.size() - 1)];
+    fireflies[pick].letGo();
 }
 
 int LightString::getLoadSize() const
@@ -88,7 +165,16 @@ int LightString::deliverLoad()
 
 void LightString::draw() const
 {
+    // Past the warning level the string pulses darker, more strongly the closer
+    // the meter is to full, so players can feel a drop coming.
+    float brightness = 1.0f;
+    if (shake > WARNING_LEVEL) {
+        float danger = (shake - WARNING_LEVEL) / (1.0f - WARNING_LEVEL);
+        float pulse = 0.5f + 0.5f * std::sin((float)GetTime() * FLICKER_SPEED);
+        brightness = 1.0f - FLICKER_DIMMING * danger * pulse;
+    }
+
     // A wide faint line under a thin bright one reads as a soft glow.
-    DrawLineEx(start, end, HALO_THICKNESS, HALO_COLOR);
-    DrawLineEx(start, end, CORE_THICKNESS, CORE_COLOR);
+    DrawLineEx(start, end, HALO_THICKNESS, Fade(HALO_COLOR, HALO_COLOR.a / 255.0f * brightness));
+    DrawLineEx(start, end, CORE_THICKNESS, Fade(CORE_COLOR, brightness));
 }
