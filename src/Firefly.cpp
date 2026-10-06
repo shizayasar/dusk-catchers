@@ -9,6 +9,9 @@ const float DRIFT_SPEED = 35.0f;       // pixels per second
 const float MIN_TURN_RATE = 0.6f;      // radians per second; lower means wider loops
 const float MAX_TURN_RATE = 1.4f;
 const float TURN_CHANGE_TIME = 3.0f;   // seconds between picking a new turn rate
+// A firefly that just fell off is still touching the string; this stops the
+// string grabbing it straight back.
+const float CATCH_COOLDOWN = 1.0f;
 const float RADIUS = 4.0f;
 const float HALO_RADIUS = 10.0f;
 const Color CORE_COLOR = {255, 235, 140, 255}; // warm yellow
@@ -27,7 +30,8 @@ Firefly::Firefly(Vector2 startPosition)
       turnRate(0.0f),
       turnTimer(0.0f),
       clinging(false),
-      stringT(0.0f)
+      stringT(0.0f),
+      catchCooldown(0.0f)
 {
     pickNewTurnRate();
 }
@@ -37,6 +41,8 @@ void Firefly::update(float dt)
     if (clinging) {
         return; // the string carries us; see followString()
     }
+
+    catchCooldown -= dt;
 
     // Flying forward while turning steadily traces a circle; changing the turn
     // rate now and then makes the loops wander instead of repeating forever.
@@ -70,6 +76,12 @@ void Firefly::followString(Vector2 stringStart, Vector2 stringEnd)
     // Keeping the same fraction t means we slide apart as the string stretches
     // and swing along when it turns.
     position = Vector2Lerp(stringStart, stringEnd, stringT);
+}
+
+void Firefly::letGo()
+{
+    clinging = false;
+    catchCooldown = CATCH_COOLDOWN;
 }
 
 void Firefly::pickNewTurnRate()

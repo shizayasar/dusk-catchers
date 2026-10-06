@@ -22,7 +22,7 @@ Each evening earns one to three stars and can be replayed. Nobody loses; the vil
 The whole game rests on one rule: fireflies cling to the string, and you have to get them home together.
 
 - **The string.** A glowing line joins the two critters and moves with them. Any firefly it touches clings to it and rides along.
-- **Shaking loose.** Move too fast, stretch past the maximum length, or swing the string sharply, and fireflies start dropping off one by one. The string flickers first as a warning.
+- **Shaking loose.** Yank the string by moving the critters in different directions (pulling apart or swinging it sharply), or stretch it past the maximum length, and fireflies start dropping off one by one. Moving both critters together, even at full speed, is safe. The string flickers first as a warning.
 - **Delivering.** Sweep the string across an unlit lantern to hand over every firefly on it. A bigger load scores more and lights the lantern brighter.
 - **The village.** Lit lanterns stay lit and brighten their corner of the map for the rest of the evening.
 
@@ -31,7 +31,7 @@ The whole game rests on one rule: fireflies cling to the string, and you have to
 | Common | Drifts in slow loops | Learn to gather and carry |
 | Shy | Darts away when a critter gets close | Brush past from a distance, using the string's length |
 | Pair | Two linked fireflies that only cling if gathered in the same sweep | Line up one clean sweep together |
-| Golden | Appears only after both critters stand still together for 2 seconds, and shakes loose easily | Pause together, then carry extra gently |
+| Golden | Appears only after both critters stand still together for 2 seconds, shakes loose easily, and counts as 3 fireflies in a load | Pause together, then carry extra gently |
 
 ## Evenings
 
