@@ -28,6 +28,7 @@ add_executable(dusk_catchers
     src/GoldenFirefly.cpp
     src/Lantern.cpp
     src/Evening.cpp
+    src/Obstacle.cpp
 )
 target_link_libraries(dusk_catchers PRIVATE raylib)
 

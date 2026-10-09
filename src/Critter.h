@@ -22,6 +22,9 @@ public:
     Vector2 getPosition() const { return position; }
     // True if the critter moved this frame.
     bool isMoving() const { return moving; }
+    float getRadius() const;
+    // Used when an obstacle pushes the critter back out of it.
+    void setPosition(Vector2 newPosition) { position = newPosition; }
 
 private:
     Vector2 position;

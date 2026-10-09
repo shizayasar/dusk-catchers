@@ -47,7 +47,8 @@ LightString::LightString(const Critter& startCritter, const Critter& endCritter,
       end(endCritter.getPosition()),
       previousStart(start),
       previousEnd(end),
-      shake(0.0f)
+      shake(0.0f),
+      outsideStrain(0.0f)
 {
 }
 
@@ -56,6 +57,12 @@ void LightString::reset()
     start = previousStart = startCritter.getPosition();
     end = previousEnd = endCritter.getPosition();
     shake = 0.0f;
+    outsideStrain = 0.0f;
+}
+
+void LightString::addStrain(float strainPerSecond)
+{
+    outsideStrain += strainPerSecond;
 }
 
 void LightString::update(float dt)
@@ -92,7 +99,8 @@ void LightString::updateShake(float dt)
     float pullSpeed = Vector2Length(Vector2Subtract(startVelocity, endVelocity));
     float overStretch = Vector2Distance(start, end) - MAX_LENGTH;
 
-    float strain = 0.0f;
+    float strain = outsideStrain;
+    outsideStrain = 0.0f; // used up; Game adds it again each frame it still applies
     if (pullSpeed > SAFE_PULL_SPEED) {
         strain += (pullSpeed - SAFE_PULL_SPEED) * SHAKE_PER_PULL_SPEED;
     }
