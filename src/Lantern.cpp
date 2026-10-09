@@ -14,6 +14,8 @@ const float BIG_GLOW_SCALE = 1.8f;      // its glow reaches this much further
 const int NEEDED_FONT_SIZE = 20;
 const Color NEEDED_TEXT_COLOR = {255, 220, 150, 200};
 
+const float BLOOM_TIME = 0.5f;          // seconds for the glow to open fully
+
 const Color UNLIT_BODY_COLOR = {55, 50, 70, 255};
 const Color UNLIT_RIM_COLOR = {120, 110, 140, 255};
 const Color LIT_CORE_COLOR = {255, 200, 120, 255};  // warm orange-white
@@ -21,8 +23,15 @@ const Color LIT_GLOW_COLOR = {255, 150, 60, 255};   // orange; alpha set per hal
 }
 
 Lantern::Lantern(Vector2 position, int loadNeeded)
-    : position(position), loadNeeded(loadNeeded), lit(false), fireflyCount(0)
+    : position(position), loadNeeded(loadNeeded), lit(false), fireflyCount(0), bloom(0.0f)
 {
+}
+
+void Lantern::update(float dt)
+{
+    if (lit && bloom < 1.0f) {
+        bloom = std::min(1.0f, bloom + dt / BLOOM_TIME);
+    }
 }
 
 void Lantern::draw() const
@@ -53,6 +62,9 @@ void Lantern::drawGlow() const
     if (isBig()) {
         glowRadius *= BIG_GLOW_SCALE;
     }
+    // Ease out: open quickly, then settle gently into full size.
+    float opened = 1.0f - (1.0f - bloom) * (1.0f - bloom);
+    glowRadius *= opened;
 
     // Stacked transparent circles, faintest and widest first, read as a soft bloom.
     DrawCircleV(position, glowRadius, Fade(LIT_GLOW_COLOR, 0.08f));

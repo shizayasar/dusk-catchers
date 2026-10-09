@@ -9,6 +9,8 @@ class Lantern {
 public:
     explicit Lantern(Vector2 position, int loadNeeded = 1);
 
+    // Grows the glow after lighting, so the lantern blooms open.
+    void update(float dt);
     // The solid lantern. Drawn normally.
     void draw() const;
     // Its light, if lit. Meant to be drawn with additive blending, so
@@ -29,4 +31,5 @@ private:
     int loadNeeded;   // smallest delivery that lights it
     bool lit;
     int fireflyCount; // how many fireflies lit it; decides how far the glow reaches
+    float bloom;      // 0 just lit, rising to 1 when the glow is fully open
 };

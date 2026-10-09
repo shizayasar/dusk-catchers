@@ -8,6 +8,7 @@
 #include "Firefly.h"
 #include "Lantern.h"
 #include "LightString.h"
+#include "Particles.h"
 #include "Wind.h"
 
 // Owns everything in the game, keeps score and switches between screens.
@@ -55,6 +56,7 @@ private:
     LightString lightString; // must come after the critters and fireflies it refers to
     std::vector<Lantern> lanterns;
     Wind wind;
+    Particles particles;
 
     Screen screen;
     float timeLeft; // seconds until full dark

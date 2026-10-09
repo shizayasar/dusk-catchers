@@ -59,6 +59,11 @@ const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 // without brushing the lantern and delivering by accident.
 const float LANTERN_CLEAR_ZONE = 30.0f;
 
+// Sparks thrown out when a lantern lights: a base amount plus more per firefly.
+const int BURST_BASE_SPARKS = 12;
+const int BURST_SPARKS_PER_FIREFLY = 4;
+const int BURST_MAX_SPARKS = 90;
+
 // Shake meter per second while the string crosses a tree or fence.
 const float SNAG_STRAIN = 1.2f;
 
@@ -176,6 +181,12 @@ void Game::update(float dt)
         updatePlaying(dt);
         break;
     case Screen::Results:
+        // Lighting the last lantern ends the round at once, so let it finish
+        // blooming (and its sparks finish flying) here.
+        for (Lantern& lantern : lanterns) {
+            lantern.update(dt);
+        }
+        particles.update(dt);
         if (IsKeyPressed(KEY_ENTER)) {
             screen = Screen::EveningSelect;
         }
@@ -235,6 +246,7 @@ void Game::startRound()
     lanterns = evening.lanterns; // a fresh, unlit copy for this round
 
     wind = Wind(evening.windStrength, evening.windDirection);
+    particles.clear();
 
     timeLeft = evening.length;
     score = 0;
@@ -284,6 +296,10 @@ void Game::updatePlaying(float dt)
     lightString.update(dt);
 
     deliverToLanterns();
+    for (Lantern& lantern : lanterns) {
+        lantern.update(dt);
+    }
+    particles.update(dt);
     if (evening.goldenFireflies) {
         updateGoldenSpawning(dt);
     }
@@ -353,6 +369,7 @@ void Game::drawPlaying() const
     for (const std::unique_ptr<Firefly>& firefly : fireflies) {
         firefly->draw();
     }
+    particles.draw();
     EndBlendMode();
 
     critter1.draw();
@@ -373,6 +390,7 @@ void Game::drawResults() const
     for (const Lantern& lantern : lanterns) {
         lantern.drawGlow();
     }
+    particles.draw();
     EndBlendMode();
 
     drawCenteredText(evening.name.c_str(), 110, HUD_FONT_SIZE, HINT_COLOR);
@@ -480,6 +498,9 @@ void Game::deliverToLanterns()
         if (lightString.touches(lantern.getPosition(), lantern.getRadius())) {
             int delivered = lightString.deliverLoad();
             lantern.light(delivered);
+            particles.burst(lantern.getPosition(),
+                            std::min(BURST_MAX_SPARKS,
+                                     BURST_BASE_SPARKS + BURST_SPARKS_PER_FIREFLY * delivered));
             score += pointsForDelivery(delivered);
             biggestDelivery = std::max(biggestDelivery, delivered);
         }
