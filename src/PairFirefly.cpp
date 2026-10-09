@@ -35,7 +35,10 @@ void PairFirefly::update(float dt, Vector2 critter1Position, Vector2 critter2Pos
 
     // The pair drifts as one unit around the middle of its link.
     Vector2 center = Vector2Lerp(position, partnerPosition, 0.5f);
-    placeBodiesAround(moveForward(center, DRIFT_SPEED, dt));
+    center = moveForward(center, DRIFT_SPEED, dt);
+    // The bodies stick out half a link from the center, so keep the center that
+    // much further in, or one body could slip past the edge.
+    placeBodiesAround(keepOnScreen(center, EDGE_MARGIN + LINK_LENGTH / 2.0f));
 }
 
 void PairFirefly::draw() const
