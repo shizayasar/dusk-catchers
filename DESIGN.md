@@ -105,7 +105,7 @@ Plan on roughly 5 to 7 weeks of part-time work; milestones 1 to 3 fit in a weeke
 - [x] **3. Gather and carry.** The glowing line joins the critters, common fireflies drift, and any firefly the string touches clings to it. Done when fireflies stay on the string as it moves and stretches.
 - [x] **4. Deliver and light up.** Lanterns to deliver to, a 3-minute timer, a darkening sky, and a results screen showing the lit village. Done when a friend can play start to finish without explanation.
 - [x] **5. Variety.** Shy, pair and golden fireflies, plus shaking loose when you move too fast or stretch too far. Done when carrying a big load feels tense but fair.
-- [ ] **6. Seven evenings.** Load each evening from a data file, build all seven, and add an evening-select screen with stars. Done when a new evening can be added without changing any C++.
+- [x] **6. Seven evenings.** Load each evening from a data file, build all seven, and add an evening-select screen with stars. Done when a new evening can be added without changing any C++.
 - [ ] **7. Polish.** Glow, particles, chimes, music, a title screen and solo tuning. Done when three people have played it and their top complaints are fixed.
 - [ ] **8. Ship it.** Emscripten web build on itch.io, a README with a gameplay GIF, and a GitHub Actions build. Done when the link works in a fresh browser.
 
