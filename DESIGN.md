@@ -61,10 +61,9 @@ Co-op and solo use the same keys, so solo is simply one person steering both cri
 | Mode | Critter 1 | Critter 2 | Tuning |
 | --- | --- | --- | --- |
 | Co-op, one keyboard | WASD | Arrow keys | Standard |
-| Co-op, gamepads | Gamepad 1 left stick | Gamepad 2 left stick | Standard |
 | Solo, both hands | WASD | Arrow keys | Longer string, fireflies cling more tightly |
 
-Enter starts a round and Esc pauses. For the first few seconds of each round, each critter's keys are shown beneath it and then fade out. Browsers only detect a gamepad after a button press, so the title screen says "Press any button to join." Solo matters most for the portfolio, since most visitors will play alone.
+The title screen offers Solo or Co-op. Enter starts a round; Esc pauses it, and from the pause screen Enter resumes and Q returns to evening select. For the first few seconds of each round, each critter's keys are shown beneath it and then fade out. Solo matters most for the portfolio, since most visitors will play alone.
 
 ## Look, feel and sound
 
@@ -72,9 +71,9 @@ The look is built from shapes and light, so it can look pretty before there is a
 
 - **Palette.** The sky fades from dusky purple to deep navy over the round; fireflies and the string glow warm yellow, and lit lanterns bloom orange across the village.
 - **Glow.** Draw each firefly and the string as a bright core with a few soft, transparent halos, using additive blending so they bloom against the dark.
-- **Critters.** Start as round shapes with dot eyes. Swap in sprites from a free asset pack or original pixel art once the game is fun.
+- **Critters.** Start as round shapes with dot eyes that look the way the critter is moving. Swap in sprites from a free asset pack or original pixel art once the game is fun.
 - **Juice.** Each firefly that clings gives a tiny chime that rises in pitch as the load grows. A delivery bursts into particles as the lantern blooms open. Critters squash and stretch a little as they move.
-- **Sound.** One calm ambient loop (crickets, soft pads) plus the catch chimes. Use only assets we are licensed to use, and credit them in the README.
+- **Sound.** One calm ambient loop (crickets, soft pads) plus the catch chimes, all generated in code from sine waves when the game starts, so there are no audio files or licenses to manage.
 
 ## Tech plan
 
@@ -85,7 +84,7 @@ The code is a handful of classes, each with `update(dt)` and `draw()`; there is 
 | Class | Count | Responsibilities |
 | --- | --- | --- |
 | `Game` | 1 | Owns every object. Loads each evening from data and keeps score. Each frame: input, then update, then draw. Switches screens: Title, Evening select, Playing, Results. |
-| `Critter` | 2 | Position and speed. Reads its own keys or gamepad. |
+| `Critter` | 2 | Position and speed. Reads its own keys. |
 | `LightString` | 1 | The line between the two critters. Picks up fireflies it touches (line-vs-circle test), carries them, drops them if shaken, and delivers its load to a lantern. |
 | `Firefly` | many | Base class for every kind: drifting, clinging, riding the string and letting go. `CommonFirefly`, `ShyFirefly`, `PairFirefly` and `GoldenFirefly` override only what makes each kind different. |
 | `Lantern` | many | Lit or unlit; its glow grows with the size of the load delivered. A big lantern needs a minimum load. |
@@ -111,7 +110,12 @@ Plan on roughly 5 to 7 weeks of part-time work; milestones 1 to 3 fit in a weeke
 
 ## Scope and learning goals
 
-Left out on purpose: online multiplayer, accounts, leaderboards, story, and any custom engine. New ideas go on a "later" list, not into the build.
+Left out on purpose: online multiplayer, accounts, leaderboards, story, and any custom engine. New ideas go on the "later" list below, not into the build.
+
+**Later list**
+
+- Gamepad co-op: each gamepad's left stick moves one critter, and the title screen says "Press any button to join" (browsers only detect a gamepad after a button press).
+- Saving best stars between sessions (planned alongside the web build in milestone 8).
 
 The developer should be able to explain each of these in an interview:
 
