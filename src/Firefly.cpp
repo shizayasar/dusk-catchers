@@ -79,9 +79,14 @@ Vector2 Firefly::moveForward(Vector2 from, float speed, float dt) const
 {
     Vector2 forward = {std::cos(heading), std::sin(heading)};
     Vector2 to = Vector2Add(from, Vector2Scale(forward, speed * dt));
-    to.x = Clamp(to.x, RADIUS, GetScreenWidth() - RADIUS);
-    to.y = Clamp(to.y, RADIUS, GetScreenHeight() - RADIUS);
-    return to;
+    return keepOnScreen(to, EDGE_MARGIN);
+}
+
+Vector2 Firefly::keepOnScreen(Vector2 point, float margin)
+{
+    point.x = Clamp(point.x, margin, GetScreenWidth() - margin);
+    point.y = Clamp(point.y, margin, GetScreenHeight() - margin);
+    return point;
 }
 
 bool Firefly::touches(const LightString& string, Vector2 point)

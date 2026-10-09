@@ -41,11 +41,16 @@ protected:
     explicit Firefly(Vector2 startPosition);
 
     static constexpr float DRIFT_SPEED = 35.0f; // pixels per second
+    // Critters stop 18 pixels from the edge and the string catches within 10,
+    // so anything closer to the edge than 28 pixels would be out of reach.
+    static constexpr float EDGE_MARGIN = 24.0f;
 
     // Tick the timers and turn a little; call once per frame while free.
     void wander(float dt);
     // Where `from` ends up after moving along our heading, kept on screen.
     Vector2 moveForward(Vector2 from, float speed, float dt) const;
+    // `point`, pushed back inside the screen so it stays margin pixels from every edge.
+    static Vector2 keepOnScreen(Vector2 point, float margin);
     static bool touches(const LightString& string, Vector2 point);
     static void drawBody(Vector2 at, Color core, Color halo);
     static float randomFloat(float min, float max);
