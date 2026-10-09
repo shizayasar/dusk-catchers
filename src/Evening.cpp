@@ -86,6 +86,9 @@ bool Evening::readSetting(const std::string& key, std::istringstream& values)
         lanterns.push_back(position);
         return true;
     }
+    if (key == "wind") {
+        return static_cast<bool>(values >> windStrength >> windDirection);
+    }
     if (key == "tree") {
         Vector2 center;
         float radius = 0.0f;

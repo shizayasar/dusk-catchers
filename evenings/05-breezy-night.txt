@@ -1,0 +1,19 @@
+# Evening 5: Breezy night
+# Gusts blow from the village toward the meadow, pushing the critters and
+# straining the string like a sail. Point the string into the wind and keep
+# it short when a gust comes.
+
+name Breezy night
+critters 160 270 400 270
+meadow 40 40 480 460
+mix common 50 shy 25 pair 25
+wind 90 180                 # strength (px/s) and direction in degrees (180 blows left)
+
+# The village, upwind on the right.
+lantern 700 120
+lantern 830 80
+lantern 900 200
+lantern 760 260
+lantern 880 340
+lantern 720 420
+lantern 850 470
