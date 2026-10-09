@@ -13,7 +13,7 @@ Each evening is one round, about 3 minutes from sunset to full dark.
 1. Move the two critters so the string brushes through fireflies; each one clings to it.
 2. Carry the load to an unlit lantern, moving gently so nobody falls off.
 3. Sweep the string across the lantern to deliver. Bigger loads light it brighter and score more.
-4. When night falls, the village shows every lantern you lit, your score and your biggest delivery.
+4. When night falls, or as soon as every lantern is lit, the village shows every lantern you lit, your score and your biggest delivery.
 
 Each evening earns one to three stars and can be replayed. Nobody loses; the village is just brighter or dimmer.
 
@@ -47,7 +47,7 @@ The game is a week of seven short evenings. Each one adds a single new idea, so 
 | 6. The footbridge | A narrow bridge over a stream | Cross single file, carefully |
 | 7. Festival night | Everything at once, plus golden fireflies | Light the big lantern in the town square |
 
-- **Stars, not failure.** Each evening ends at full dark however you did, and earns one to three stars for the lanterns you lit.
+- **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit.
 - **Everything unlocked.** All evenings are open from the start, so a visitor with two minutes can jump straight to the best one.
 - **Data, not code.** Each evening is a small data file listing its firefly types, obstacles, wind strength and lantern positions. Adding an evening means writing a file, not new C++.
 

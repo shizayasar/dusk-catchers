@@ -33,6 +33,7 @@ private:
     void updateGoldenSpawning(float dt);
     void deliverToLanterns();
     int countLitLanterns() const;
+    bool allLanternsLit() const;
 
     Critter critter1;
     Critter critter2;

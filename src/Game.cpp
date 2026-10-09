@@ -168,7 +168,8 @@ void Game::updatePlaying(float dt)
         spawnFirefly();
     }
 
-    if (timeLeft <= 0.0f) {
+    // The evening ends at full dark, or early once there's nothing left to light.
+    if (timeLeft <= 0.0f || allLanternsLit()) {
         screen = Screen::Results;
     }
 }
@@ -200,7 +201,8 @@ void Game::drawResults() const
         lantern.draw();
     }
 
-    drawCenteredText("Night has fallen", 150, RESULTS_TITLE_SIZE, RESULTS_TITLE_COLOR);
+    const char* title = allLanternsLit() ? "Every lantern is lit!" : "Night has fallen";
+    drawCenteredText(title, 150, RESULTS_TITLE_SIZE, RESULTS_TITLE_COLOR);
     drawCenteredText(TextFormat("Lanterns lit: %d of %d", countLitLanterns(), (int)lanterns.size()),
                      230, RESULTS_LINE_SIZE, RESULTS_TEXT_COLOR);
     drawCenteredText(TextFormat("Score: %d", score), 270, RESULTS_LINE_SIZE, RESULTS_TEXT_COLOR);
@@ -307,4 +309,9 @@ int Game::countLitLanterns() const
         }
     }
     return count;
+}
+
+bool Game::allLanternsLit() const
+{
+    return countLitLanterns() == (int)lanterns.size();
 }
