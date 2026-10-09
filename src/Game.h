@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Audio.h"
 #include "Critter.h"
 #include "Evening.h"
 #include "Firefly.h"
@@ -57,6 +58,7 @@ private:
     std::vector<Lantern> lanterns;
     Wind wind;
     Particles particles;
+    Audio audio;
 
     Screen screen;
     float timeLeft; // seconds until full dark

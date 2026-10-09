@@ -292,8 +292,13 @@ void Game::updatePlaying(float dt)
         }
     }
     // Last, so it sees where everything is now and has the final say on where
-    // carried fireflies sit.
+    // carried fireflies sit. A bigger load afterwards means something clung.
+    int loadBefore = lightString.getLoadSize();
     lightString.update(dt);
+    int loadAfter = lightString.getLoadSize();
+    if (loadAfter > loadBefore) {
+        audio.playCatch(loadAfter);
+    }
 
     deliverToLanterns();
     for (Lantern& lantern : lanterns) {
