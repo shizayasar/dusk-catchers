@@ -33,4 +33,7 @@ private:
     Color color;
     ControlKeys keys;
     bool moving;
+    // Eases toward the direction of movement (length up to 1), or back to zero
+    // when still. Drives where the eyes look and how the body stretches.
+    Vector2 look;
 };
