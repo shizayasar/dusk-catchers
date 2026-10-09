@@ -149,6 +149,7 @@ void Game::loadEvenings()
     for (const std::string& path : paths) {
         Evening loaded;
         if (loaded.loadFromFile(path)) {
+            TraceLog(LOG_INFO, "GAME: Loaded evening \"%s\" from %s", loaded.name.c_str(), path.c_str());
             evenings.push_back(loaded);
         }
     }
