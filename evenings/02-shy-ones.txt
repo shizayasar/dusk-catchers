@@ -1,0 +1,17 @@
+# Evening 2: Shy ones
+# Shy fireflies dart away from critters. Brush past them from a distance,
+# using the length of the string.
+
+name Shy ones
+critters 300 380 560 380
+meadow 40 60 560 440
+mix common 60 shy 40
+
+# The village, up in the top-right corner.
+lantern 700 90
+lantern 820 70
+lantern 920 130
+lantern 760 190
+lantern 880 240
+lantern 720 300
+lantern 900 360

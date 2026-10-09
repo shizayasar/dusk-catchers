@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
+#include <utility>
 
 #include "CommonFirefly.h"
 #include "GoldenFirefly.h"
@@ -11,7 +13,8 @@
 #include "raymath.h"
 
 namespace {
-const char* const FIRST_EVENING_FILE = "evenings/01-first-light.txt";
+// Every .txt file here is an evening, played in filename order.
+const char* const EVENINGS_FOLDER = "evenings";
 
 // The sky fades from the first color to the second over the round.
 const Color SUNSET_SKY_COLOR = {72, 52, 104, 255}; // dusky purple
@@ -20,11 +23,26 @@ const Color NIGHT_SKY_COLOR = {12, 14, 36, 255};   // deep navy
 const int HUD_FONT_SIZE = 20;
 const Color HUD_TEXT_COLOR = {255, 245, 225, 180}; // soft, slightly see-through white
 
-const int RESULTS_TITLE_SIZE = 40;
-const int RESULTS_LINE_SIZE = 24;
-const Color RESULTS_TITLE_COLOR = {255, 220, 150, 255}; // warm lantern yellow
-const Color RESULTS_TEXT_COLOR = {255, 245, 225, 230};
-const Color RESULTS_HINT_COLOR = {255, 245, 225, 140};
+const int TITLE_SIZE = 40;
+const int LINE_SIZE = 24;
+const Color TITLE_COLOR = {255, 220, 150, 255}; // warm lantern yellow
+const Color TEXT_COLOR = {255, 245, 225, 230};
+const Color HINT_COLOR = {255, 245, 225, 140};
+
+// Evening select list.
+const int LIST_TOP = 120;         // y of the first row
+const int LIST_ROW_HEIGHT = 44;
+const int LIST_LEFT = 250;        // x of the evening names
+const int LIST_STARS_X = 640;     // x of the first star in each row
+const Rectangle HIGHLIGHT_SIZE = {220.0f, 0.0f, 520.0f, 38.0f}; // x and size of the selected row's box
+const Color HIGHLIGHT_COLOR = {255, 220, 150, 40};
+
+// Stars.
+const float STAR_OUTER_RADIUS = 12.0f;
+const float STAR_INNER_RADIUS = 5.0f;
+const float STAR_SPACING = 30.0f;
+const Color STAR_EARNED_COLOR = {255, 210, 90, 255};  // gold
+const Color STAR_EMPTY_COLOR = {255, 245, 225, 50};   // faint outline-ish white
 
 // Each critter's keys are shown under it at the start of a round, then fade out.
 const float CONTROLS_HINT_SHOW_TIME = 5.0f; // seconds fully visible
@@ -60,34 +78,97 @@ void drawCenteredText(const char* text, int y, int fontSize, Color color)
     int width = MeasureText(text, fontSize);
     DrawText(text, (GetScreenWidth() - width) / 2, y, fontSize, color);
 }
+
+// raylib only fills a triangle whose corners go round in one particular
+// direction, so swap two corners if they go the other way.
+void drawTriangleAnyOrder(Vector2 a, Vector2 b, Vector2 c, Color color)
+{
+    float turn = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    if (turn > 0.0f) {
+        std::swap(b, c);
+    }
+    DrawTriangle(a, b, c, color);
+}
+
+// A five-pointed star: ten points alternating between the outer and inner
+// radius, each pair joined to the center by a triangle.
+void drawStar(Vector2 center, Color color)
+{
+    const int POINTS = 10;
+    Vector2 corners[POINTS];
+    for (int i = 0; i < POINTS; i++) {
+        float radius = (i % 2 == 0) ? STAR_OUTER_RADIUS : STAR_INNER_RADIUS;
+        float angle = -PI / 2.0f + i * PI / 5.0f; // start pointing straight up
+        corners[i] = {center.x + std::cos(angle) * radius, center.y + std::sin(angle) * radius};
+    }
+    for (int i = 0; i < POINTS; i++) {
+        drawTriangleAnyOrder(center, corners[i], corners[(i + 1) % POINTS], color);
+    }
+}
+
+// Three stars in a row starting at `left`, the first `earned` of them gold.
+void drawStarRow(Vector2 left, int earned)
+{
+    for (int i = 0; i < 3; i++) {
+        Vector2 center = {left.x + i * STAR_SPACING, left.y};
+        drawStar(center, i < earned ? STAR_EARNED_COLOR : STAR_EMPTY_COLOR);
+    }
+}
 }
 
 Game::Game()
-    : critter1(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS),
+    : selectedEvening(0),
+      critter1(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS),
       critter2(evening.critter2Start, CRITTER2_COLOR, CRITTER2_KEYS),
       lightString(critter1, critter2, fireflies),
-      screen(Screen::Playing),
+      screen(Screen::EveningSelect),
       timeLeft(0.0f),
       score(0),
       biggestDelivery(0),
       stillTimer(0.0f)
 {
-    if (!evening.loadFromFile(FIRST_EVENING_FILE)) {
-        TraceLog(LOG_ERROR, "GAME: Couldn't load %s; run the game from the project folder",
-                 FIRST_EVENING_FILE);
+    loadEvenings();
+}
+
+void Game::loadEvenings()
+{
+    // Sorting by filename is what lets "01-", "02-", ... set the order.
+    FilePathList files = LoadDirectoryFiles(EVENINGS_FOLDER);
+    std::vector<std::string> paths;
+    for (unsigned int i = 0; i < files.count; i++) {
+        if (IsFileExtension(files.paths[i], ".txt")) {
+            paths.push_back(files.paths[i]);
+        }
     }
-    startRound();
+    UnloadDirectoryFiles(files); // raylib allocated the list; hand it back
+    std::sort(paths.begin(), paths.end());
+
+    for (const std::string& path : paths) {
+        Evening loaded;
+        if (loaded.loadFromFile(path)) {
+            evenings.push_back(loaded);
+        }
+    }
+    bestStars.assign(evenings.size(), 0);
+
+    if (evenings.empty()) {
+        TraceLog(LOG_ERROR, "GAME: No evenings found in \"%s\"; run the game from the project folder",
+                 EVENINGS_FOLDER);
+    }
 }
 
 void Game::update(float dt)
 {
     switch (screen) {
+    case Screen::EveningSelect:
+        updateEveningSelect();
+        break;
     case Screen::Playing:
         updatePlaying(dt);
         break;
     case Screen::Results:
         if (IsKeyPressed(KEY_ENTER)) {
-            startRound();
+            screen = Screen::EveningSelect;
         }
         break;
     }
@@ -96,6 +177,9 @@ void Game::update(float dt)
 void Game::draw()
 {
     switch (screen) {
+    case Screen::EveningSelect:
+        drawEveningSelect();
+        break;
     case Screen::Playing:
         drawPlaying();
         break;
@@ -105,13 +189,32 @@ void Game::draw()
     }
 }
 
+void Game::updateEveningSelect()
+{
+    if (evenings.empty()) {
+        return;
+    }
+    int count = (int)evenings.size();
+    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+        selectedEvening = (selectedEvening + count - 1) % count; // wrap from top to bottom
+    }
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+        selectedEvening = (selectedEvening + 1) % count;
+    }
+    if (IsKeyPressed(KEY_ENTER)) {
+        startRound();
+    }
+}
+
 void Game::startRound()
 {
+    evening = evenings[selectedEvening];
+
     // Replacing the critters with fresh ones puts them back at their start spots.
     // The string keeps working because it refers to these same two members.
     critter1 = Critter(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS);
     critter2 = Critter(evening.critter2Start, CRITTER2_COLOR, CRITTER2_KEYS);
-    // The critters just jumped back to their start spots; don't let the string
+    // The critters just jumped to their start spots; don't let the string
     // mistake that for a violent yank.
     lightString.reset();
 
@@ -130,6 +233,12 @@ void Game::startRound()
     biggestDelivery = 0;
     stillTimer = 0.0f;
     screen = Screen::Playing;
+}
+
+void Game::finishRound()
+{
+    bestStars[selectedEvening] = std::max(bestStars[selectedEvening], starsEarned());
+    screen = Screen::Results;
 }
 
 void Game::updatePlaying(float dt)
@@ -157,8 +266,36 @@ void Game::updatePlaying(float dt)
 
     // The evening ends at full dark, or early once there's nothing left to light.
     if (timeLeft <= 0.0f || allLanternsLit()) {
-        screen = Screen::Results;
+        finishRound();
     }
+}
+
+void Game::drawEveningSelect() const
+{
+    ClearBackground(NIGHT_SKY_COLOR);
+    drawCenteredText("Choose an evening", 50, TITLE_SIZE, TITLE_COLOR);
+
+    if (evenings.empty()) {
+        drawCenteredText("No evenings found.", 230, LINE_SIZE, TEXT_COLOR);
+        drawCenteredText("Run the game from the project folder, next to evenings/.",
+                         270, HUD_FONT_SIZE, HINT_COLOR);
+        return;
+    }
+
+    for (int i = 0; i < (int)evenings.size(); i++) {
+        int y = LIST_TOP + i * LIST_ROW_HEIGHT;
+        if (i == selectedEvening) {
+            Rectangle box = HIGHLIGHT_SIZE;
+            box.y = (float)y - 8.0f;
+            DrawRectangleRounded(box, 0.4f, 8, HIGHLIGHT_COLOR);
+        }
+        DrawText(TextFormat("%d. %s", i + 1, evenings[i].name.c_str()), LIST_LEFT, y, LINE_SIZE,
+                 i == selectedEvening ? TITLE_COLOR : TEXT_COLOR);
+        drawStarRow({(float)LIST_STARS_X, (float)y + LINE_SIZE / 2.0f - 1.0f}, bestStars[i]);
+    }
+
+    drawCenteredText("Up / Down to choose, Enter to play", GetScreenHeight() - 40,
+                     HUD_FONT_SIZE, HINT_COLOR);
 }
 
 void Game::drawPlaying() const
@@ -188,15 +325,20 @@ void Game::drawResults() const
         lantern.draw();
     }
 
+    drawCenteredText(evening.name.c_str(), 110, HUD_FONT_SIZE, HINT_COLOR);
     const char* title = allLanternsLit() ? "Every lantern is lit!" : "Night has fallen";
-    drawCenteredText(title, 150, RESULTS_TITLE_SIZE, RESULTS_TITLE_COLOR);
+    drawCenteredText(title, 140, TITLE_SIZE, TITLE_COLOR);
     drawCenteredText(TextFormat("Lanterns lit: %d of %d", countLitLanterns(), (int)lanterns.size()),
-                     230, RESULTS_LINE_SIZE, RESULTS_TEXT_COLOR);
-    drawCenteredText(TextFormat("Score: %d", score), 270, RESULTS_LINE_SIZE, RESULTS_TEXT_COLOR);
+                     210, LINE_SIZE, TEXT_COLOR);
+    drawCenteredText(TextFormat("Score: %d", score), 250, LINE_SIZE, TEXT_COLOR);
     drawCenteredText(TextFormat("Biggest delivery: %d %s", biggestDelivery,
                                 biggestDelivery == 1 ? "firefly" : "fireflies"),
-                     310, RESULTS_LINE_SIZE, RESULTS_TEXT_COLOR);
-    drawCenteredText("Press Enter to play again", 390, HUD_FONT_SIZE, RESULTS_HINT_COLOR);
+                     290, LINE_SIZE, TEXT_COLOR);
+
+    float rowWidth = 2.0f * STAR_SPACING;
+    drawStarRow({(GetScreenWidth() - rowWidth) / 2.0f, 350.0f}, starsEarned());
+
+    drawCenteredText("Press Enter to continue", 410, HUD_FONT_SIZE, HINT_COLOR);
 }
 
 void Game::drawHud() const
@@ -306,4 +448,17 @@ int Game::countLitLanterns() const
 bool Game::allLanternsLit() const
 {
     return !lanterns.empty() && countLitLanterns() == (int)lanterns.size();
+}
+
+int Game::starsEarned() const
+{
+    // One for finishing, two for at least half the lanterns, three for all of them.
+    int lit = countLitLanterns();
+    if (allLanternsLit()) {
+        return 3;
+    }
+    if (lit * 2 >= (int)lanterns.size()) {
+        return 2;
+    }
+    return 1;
 }

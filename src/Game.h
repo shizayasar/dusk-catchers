@@ -21,11 +21,15 @@ public:
     void draw();
 
 private:
-    // Which screen is showing. Title and evening select will join these later.
-    enum class Screen { Playing, Results };
+    // Which screen is showing. A title screen will join these in milestone 7.
+    enum class Screen { EveningSelect, Playing, Results };
 
+    void loadEvenings();
     void startRound();
+    void finishRound();
+    void updateEveningSelect();
     void updatePlaying(float dt);
+    void drawEveningSelect() const;
     void drawPlaying() const;
     void drawResults() const;
     void drawHud() const;
@@ -35,6 +39,11 @@ private:
     void deliverToLanterns();
     int countLitLanterns() const;
     bool allLanternsLit() const;
+    int starsEarned() const;
+
+    std::vector<Evening> evenings;  // every evening found in the evenings folder
+    std::vector<int> bestStars;     // best stars so far for each evening (0 = not played)
+    int selectedEvening;            // index into evenings
 
     Evening evening; // the evening being played; everything below is built from it
     Critter critter1;
