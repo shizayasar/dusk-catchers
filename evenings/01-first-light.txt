@@ -1,0 +1,19 @@
+# Evening 1: First light
+# An open meadow, only common fireflies, and the village close by.
+# Learn to gather and carry.
+
+name First light
+length 180                  # seconds from sunset to full dark
+critters 320 270 640 270    # where critter 1 and critter 2 start: x y x y
+fireflies 12                # how many are out in the meadow at once
+meadow 40 40 560 460        # where fireflies appear: x y width height
+mix common 100              # chance of each kind: common, shy, pair
+
+# The village, on the right. One line per lantern: x y
+lantern 720 100
+lantern 860 140
+lantern 780 230
+lantern 900 290
+lantern 700 370
+lantern 830 410
+lantern 910 480
