@@ -13,14 +13,16 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dusk Catchers");
     InitAudioDevice(); // before Game, which creates its sounds straight away
     SetTargetFPS(TARGET_FPS);
+    // raylib quits on Esc by default, but Esc pauses the game. Players quit by
+    // closing the window, which is also how it works in a browser.
+    SetExitKey(KEY_NULL);
 
     // The extra braces end Game's lifetime here, so its sounds are freed
     // before the audio device closes below.
     {
         Game game;
 
-        // The game loop: runs once per frame until the window is closed (or Esc
-        // is pressed, which is raylib's default quit key until we add a pause menu).
+        // The game loop: runs once per frame until the window is closed.
         while (!WindowShouldClose()) {
             game.update(GetFrameTime());
 

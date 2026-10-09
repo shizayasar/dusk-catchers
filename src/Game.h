@@ -25,7 +25,7 @@ public:
 
 private:
     // Which screen is showing.
-    enum class Screen { Title, EveningSelect, Playing, Results };
+    enum class Screen { Title, EveningSelect, Playing, Paused, Results };
 
     void loadEvenings();
     void startRound();
@@ -36,6 +36,7 @@ private:
     void drawTitle() const;
     void drawEveningSelect() const;
     void drawPlaying() const;
+    void drawPaused() const;
     void drawResults() const;
     void drawHud() const;
     void drawControlsHint() const;

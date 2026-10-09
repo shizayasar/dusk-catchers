@@ -28,6 +28,7 @@ const int LINE_SIZE = 24;
 const Color TITLE_COLOR = {255, 220, 150, 255}; // warm lantern yellow
 const Color TEXT_COLOR = {255, 245, 225, 230};
 const Color HINT_COLOR = {255, 245, 225, 140};
+const Color PAUSE_DIM_COLOR = {6, 8, 20, 170}; // darkens the frozen round behind the pause text
 
 // Title screen.
 const int GAME_TITLE_SIZE = 64;
@@ -197,7 +198,18 @@ void Game::update(float dt)
         updateEveningSelect();
         break;
     case Screen::Playing:
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            screen = Screen::Paused;
+            break; // nothing moves while paused, so skip this frame's update
+        }
         updatePlaying(dt);
+        break;
+    case Screen::Paused:
+        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+            screen = Screen::Playing;
+        } else if (IsKeyPressed(KEY_Q)) {
+            screen = Screen::EveningSelect;
+        }
         break;
     case Screen::Results:
         // Lighting the last lantern ends the round at once, so let it finish
@@ -224,6 +236,9 @@ void Game::draw()
         break;
     case Screen::Playing:
         drawPlaying();
+        break;
+    case Screen::Paused:
+        drawPaused();
         break;
     case Screen::Results:
         drawResults();
@@ -262,6 +277,9 @@ void Game::updateEveningSelect()
     }
     if (IsKeyPressed(KEY_ENTER)) {
         startRound();
+    }
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        screen = Screen::Title; // to switch between Solo and Co-op
     }
 }
 
@@ -417,7 +435,7 @@ void Game::drawEveningSelect() const
         drawStarRow({(float)LIST_STARS_X, (float)y + LINE_SIZE / 2.0f - 1.0f}, bestStars[i]);
     }
 
-    drawCenteredText("Up / Down to choose, Enter to play", GetScreenHeight() - 40,
+    drawCenteredText("Up / Down to choose, Enter to play, Esc for the title screen", GetScreenHeight() - 40,
                      HUD_FONT_SIZE, HINT_COLOR);
 }
 
@@ -455,6 +473,16 @@ void Game::drawPlaying() const
 
     drawControlsHint();
     drawHud();
+}
+
+void Game::drawPaused() const
+{
+    // The frozen round, dimmed, with the choices on top.
+    drawPlaying();
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), PAUSE_DIM_COLOR);
+    drawCenteredText("Paused", 200, TITLE_SIZE, TITLE_COLOR);
+    drawCenteredText("Enter to keep playing", 280, LINE_SIZE, TEXT_COLOR);
+    drawCenteredText("Q to choose another evening", 320, LINE_SIZE, TEXT_COLOR);
 }
 
 void Game::drawResults() const
@@ -495,6 +523,10 @@ void Game::drawHud() const
     int secondsLeft = (int)std::ceil(timeLeft);
     drawCenteredText(TextFormat("%d:%02d", secondsLeft / 60, secondsLeft % 60),
                      12, HUD_FONT_SIZE, HUD_TEXT_COLOR);
+
+    const char* pauseHint = "Esc to pause";
+    DrawText(pauseHint, GetScreenWidth() - MeasureText(pauseHint, HUD_FONT_SIZE) - 16, 12,
+             HUD_FONT_SIZE, HINT_COLOR);
 }
 
 void Game::drawControlsHint() const
