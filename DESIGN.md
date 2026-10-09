@@ -47,7 +47,10 @@ The game is a week of seven short evenings. Each one adds a single new idea, so 
 | 6. The footbridge | A narrow bridge over a stream | Cross single file, carefully |
 | 7. Festival night | Everything at once, plus golden fireflies | Light the big lantern in the town square |
 
-- **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit.
+- **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit: one star for finishing, two for lighting at least half, three for lighting them all. Best stars are remembered while the game is open; saving them between sessions waits for the web build (milestone 8).
+- **Obstacles.** Critters can't walk through trees, fences or water. If the string crosses a tree or fence it snags and fireflies start shaking loose, so both critters must go around the same side.
+- **Wind.** Every few seconds a gust blows, shown as streaks. It pushes both critters along and strains the string like a sail: a long string side-on to the wind strains most, a short one pointing into the wind barely at all.
+- **The big lantern.** Festival night's lantern in the town square only lights from a single delivery of at least 10 fireflies.
 - **Everything unlocked.** All evenings are open from the start, so a visitor with two minutes can jump straight to the best one.
 - **Data, not code.** Each evening is a small data file listing its firefly types, obstacles, wind strength and lantern positions. Adding an evening means writing a file, not new C++.
 
