@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Bridge.h"
+#include "Lantern.h"
 #include "Obstacle.h"
 #include "raylib.h"
 
@@ -30,7 +31,7 @@ public:
     bool goldenFireflies = false;             // can golden ones appear?
     float windStrength = 0.0f;                // push at the height of a gust, px/s; 0 = calm
     float windDirection = 0.0f;               // degrees: 0 blows right, 90 down, 180 left
-    std::vector<Vector2> lanterns;
+    std::vector<Lantern> lanterns; // all unlit; Game copies them for each round
     std::vector<Obstacle> obstacles;
     std::vector<Bridge> bridges;
 

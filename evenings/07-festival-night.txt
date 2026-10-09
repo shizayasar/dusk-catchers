@@ -1,0 +1,31 @@
+# Evening 7: Festival night
+# Everything at once: every kind of firefly, golden ones included, a fence
+# and trees to thread through, and a light wind. Light the big lantern in
+# the town square with a single delivery of at least 10 fireflies.
+
+name Festival night
+critters 140 270 360 270
+fireflies 14
+meadow 40 40 400 460
+mix common 40 shy 25 pair 35
+golden                      # golden fireflies appear when both critters stand still
+wind 60 270                 # a light wind blowing up the screen
+
+# A fence with two gaps between the meadow and the town.
+fence 500 0 14 170
+fence 500 250 14 60
+fence 500 390 14 150
+
+# Trees.
+tree 440 460 24
+tree 600 110 26
+tree 610 450 26
+
+# The town square: the big lantern (x y and the load it needs) and its ring.
+biglantern 770 270 10
+lantern 690 160
+lantern 860 120
+lantern 910 250
+lantern 880 400
+lantern 720 410
+lantern 640 290

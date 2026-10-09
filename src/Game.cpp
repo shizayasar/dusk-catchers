@@ -226,10 +226,7 @@ void Game::startRound()
         spawnFirefly();
     }
 
-    lanterns.clear();
-    for (Vector2 position : evening.lanterns) {
-        lanterns.push_back(Lantern(position));
-    }
+    lanterns = evening.lanterns; // a fresh, unlit copy for this round
 
     wind = Wind(evening.windStrength, evening.windDirection);
 
@@ -449,7 +446,9 @@ void Game::updateGoldenSpawning(float dt)
 void Game::deliverToLanterns()
 {
     for (Lantern& lantern : lanterns) {
-        if (lantern.isLit() || lightString.getLoadSize() == 0) {
+        // Too small a load passes over a big lantern, and the string keeps it.
+        int load = lightString.getLoadSize();
+        if (lantern.isLit() || load == 0 || load < lantern.getLoadNeeded()) {
             continue;
         }
         if (lightString.touches(lantern.getPosition(), lantern.getRadius())) {

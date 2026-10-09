@@ -83,7 +83,16 @@ bool Evening::readSetting(const std::string& key, std::istringstream& values)
         if (!(values >> position.x >> position.y)) {
             return false;
         }
-        lanterns.push_back(position);
+        lanterns.push_back(Lantern(position));
+        return true;
+    }
+    if (key == "biglantern") {
+        Vector2 position;
+        int loadNeeded = 0;
+        if (!(values >> position.x >> position.y >> loadNeeded) || loadNeeded < 1) {
+            return false;
+        }
+        lanterns.push_back(Lantern(position, loadNeeded));
         return true;
     }
     if (key == "wind") {
