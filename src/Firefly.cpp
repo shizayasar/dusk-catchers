@@ -69,6 +69,15 @@ void Firefly::keepClearOf(const Obstacle& obstacle)
     if (clinging) {
         return;
     }
+    if (obstacle.isWater()) {
+        // Fireflies can cross water, but the string can rarely reach one out
+        // there, so any firefly over it heads straight for the nearest bank.
+        if (obstacle.covers(getCenter())) {
+            Vector2 out = obstacle.nearestWayOut(getCenter());
+            heading = std::atan2(out.y, out.x);
+        }
+        return;
+    }
     moveCenterTo(obstacle.pushOut(getCenter(), getReach()));
 }
 

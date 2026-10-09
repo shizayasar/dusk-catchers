@@ -28,6 +28,13 @@ public:
 
     // Where a circle at `point` has to move so it no longer overlaps the circle
     // at `center`. Shared by trees and anything else round that keeps things out.
+    // Fireflies may fly over water but not through trees or fences.
+    bool isWater() const { return kind == Kind::Water; }
+    bool covers(Vector2 point) const;
+    // Unit direction from `point` toward the nearest edge of a rectangle
+    // (fence or water), the quickest way off it.
+    Vector2 nearestWayOut(Vector2 point) const;
+
     static Vector2 pushOutOfCircle(Vector2 point, float pointRadius, Vector2 center, float radius);
 
 private:

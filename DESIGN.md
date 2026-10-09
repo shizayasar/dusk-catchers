@@ -48,7 +48,7 @@ The game is a week of seven short evenings. Each one adds a single new idea, so 
 | 7. Festival night | Everything at once, plus golden fireflies | Light the big lantern in the town square |
 
 - **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit: one star for finishing, two for lighting at least half, three for lighting them all. Best stars are remembered while the game is open; saving them between sessions waits for the web build (milestone 8).
-- **Obstacles.** Critters can't walk through trees, fences or water. If the string crosses a tree or fence it snags and fireflies start shaking loose, so both critters must go around the same side.
+- **Obstacles.** Critters can't walk through trees, fences or water. If the string crosses a tree or fence it snags and fireflies start shaking loose, so both critters must go around the same side. Fireflies can't fly through trees or fences either; they can cross water but head for the nearest bank instead of lingering over it, and they keep a little distance from lanterns so catching one never lights a lantern by accident.
 - **Wind.** Every few seconds a gust blows, shown as streaks. It pushes both critters along and strains the string like a sail: a long string side-on to the wind strains most, a short one pointing into the wind barely at all.
 - **The big lantern.** Festival night's lantern in the town square only lights from a single delivery of at least 10 fireflies.
 - **Everything unlocked.** All evenings are open from the start, so a visitor with two minutes can jump straight to the best one.

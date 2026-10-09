@@ -101,6 +101,33 @@ Vector2 Obstacle::pushOut(Vector2 point, float pointRadius) const
     return point;
 }
 
+bool Obstacle::covers(Vector2 point) const
+{
+    if (kind == Kind::Tree) {
+        return CheckCollisionPointCircle(point, center, radius);
+    }
+    return CheckCollisionPointRec(point, area);
+}
+
+Vector2 Obstacle::nearestWayOut(Vector2 point) const
+{
+    float toLeft = point.x - area.x;
+    float toRight = area.x + area.width - point.x;
+    float toTop = point.y - area.y;
+    float toBottom = area.y + area.height - point.y;
+    float nearest = std::min({toLeft, toRight, toTop, toBottom});
+    if (nearest == toLeft) {
+        return {-1.0f, 0.0f};
+    }
+    if (nearest == toRight) {
+        return {1.0f, 0.0f};
+    }
+    if (nearest == toTop) {
+        return {0.0f, -1.0f};
+    }
+    return {0.0f, 1.0f};
+}
+
 Vector2 Obstacle::pushOutOfCircle(Vector2 point, float pointRadius, Vector2 center, float radius)
 {
     Vector2 away = Vector2Subtract(point, center);
