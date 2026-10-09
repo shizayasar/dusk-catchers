@@ -35,6 +35,8 @@ public:
 
     // Push a free firefly back out of an obstacle. Carried ones ride the string.
     void keepClearOf(const Obstacle& obstacle);
+    // Push a free firefly back out of a round area, such as around a lantern.
+    void keepClearOf(Vector2 center, float radius);
 
     bool isClinging() const { return clinging; }
     // False while clinging, and for a moment after being shaken loose.
