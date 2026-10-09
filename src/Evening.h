@@ -27,6 +27,8 @@ public:
     int shyWeight = 0;
     int pairWeight = 0;
     bool goldenFireflies = false;             // can golden ones appear?
+    float windStrength = 0.0f;                // push at the height of a gust, px/s; 0 = calm
+    float windDirection = 0.0f;               // degrees: 0 blows right, 90 down, 180 left
     std::vector<Vector2> lanterns;
     std::vector<Obstacle> obstacles;
 

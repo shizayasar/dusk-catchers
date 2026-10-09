@@ -231,6 +231,8 @@ void Game::startRound()
         lanterns.push_back(Lantern(position));
     }
 
+    wind = Wind(evening.windStrength, evening.windDirection);
+
     timeLeft = evening.length;
     score = 0;
     biggestDelivery = 0;
@@ -248,8 +250,15 @@ void Game::updatePlaying(float dt)
 {
     timeLeft = std::max(0.0f, timeLeft - dt);
 
+    wind.update(dt);
+
     critter1.update(dt);
     critter2.update(dt);
+    Vector2 windPush = Vector2Scale(wind.getPush(), dt);
+    critter1.push(windPush);
+    critter2.push(windPush);
+    lightString.addStrain(wind.strainOn(critter1.getPosition(), critter2.getPosition()));
+
     for (const Obstacle& obstacle : evening.obstacles) {
         critter1.setPosition(obstacle.pushOut(critter1.getPosition(), critter1.getRadius()));
         critter2.setPosition(obstacle.pushOut(critter2.getPosition(), critter2.getRadius()));
@@ -320,6 +329,7 @@ void Game::drawPlaying() const
     for (const Lantern& lantern : lanterns) {
         lantern.draw();
     }
+    wind.draw();
     lightString.draw(); // drawn before the critters so they sit on top of its ends
     for (const std::unique_ptr<Firefly>& firefly : fireflies) {
         firefly->draw();

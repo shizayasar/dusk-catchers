@@ -25,6 +25,8 @@ public:
     float getRadius() const;
     // Used when an obstacle pushes the critter back out of it.
     void setPosition(Vector2 newPosition) { position = newPosition; }
+    // Moved by something other than the keys (the wind), staying on screen.
+    void push(Vector2 offset);
 
 private:
     Vector2 position;

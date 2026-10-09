@@ -8,6 +8,7 @@
 #include "Firefly.h"
 #include "Lantern.h"
 #include "LightString.h"
+#include "Wind.h"
 
 // Owns everything in the game, keeps score and switches between screens.
 // main() calls update() then draw() once per frame.
@@ -53,6 +54,7 @@ private:
     std::vector<std::unique_ptr<Firefly>> fireflies;
     LightString lightString; // must come after the critters and fireflies it refers to
     std::vector<Lantern> lanterns;
+    Wind wind;
 
     Screen screen;
     float timeLeft; // seconds until full dark
