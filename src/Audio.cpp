@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ctime>
 
 namespace {
 const int SAMPLE_RATE = 44100; // samples per second
@@ -16,14 +17,35 @@ const float CHIME_LOWEST_NOTE = 523.25f; // Hz (C5)
 // two of these notes sound nice together, so overlapping chimes never clash.
 const int CHIME_SEMITONES[] = {0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26};
 
-// Turns floating-point samples (-1 to 1) into a raylib Sound.
-Sound soundFromSamples(const std::vector<float>& samples)
+// Ambient music: a loop of soft chords and crickets.
+const float MUSIC_LOOP_LENGTH = 16.0f; // seconds
+const float PAD_VOLUME = 0.035f;      // per note; six notes share the pad
+// Two chords that slowly trade places over the loop (C major and A minor).
+const float CHORD_A[] = {130.81f, 196.00f, 329.63f};
+const float CHORD_B[] = {110.00f, 164.81f, 261.63f};
+const float CRICKET_PITCH = 4500.0f;  // Hz
+const float CRICKET_VOLUME = 0.035f;
+const int CRICKET_CHIRPS = 14;        // chirps per loop
+const int CRICKET_PULSES = 3;         // a chirp is a few quick pulses
+const float CRICKET_PULSE_LENGTH = 0.018f; // seconds
+const float CRICKET_PULSE_GAP = 0.03f;     // seconds from one pulse to the next
+const unsigned int CRICKET_SEED = 7;  // fixed, so the loop sounds the same every run
+const int MUSIC_CHUNK = 4096;         // samples handed to the stream at a time
+
+// 16-bit audio runs from -32768 to 32767.
+std::vector<short> toPcm(const std::vector<float>& samples)
 {
     std::vector<short> pcm(samples.size());
     for (size_t i = 0; i < samples.size(); i++) {
-        float clamped = std::clamp(samples[i], -1.0f, 1.0f);
-        pcm[i] = (short)(clamped * 32767.0f); // 16-bit audio runs from -32768 to 32767
+        pcm[i] = (short)(std::clamp(samples[i], -1.0f, 1.0f) * 32767.0f);
     }
+    return pcm;
+}
+
+// Turns floating-point samples (-1 to 1) into a raylib Sound.
+Sound soundFromSamples(const std::vector<float>& samples)
+{
+    std::vector<short> pcm = toPcm(samples);
     Wave wave;
     wave.frameCount = (unsigned int)pcm.size();
     wave.sampleRate = SAMPLE_RATE;
@@ -50,10 +72,62 @@ std::vector<float> makeChime(float frequency)
     }
     return samples;
 }
+
+// For the loop to join up without a click, every wave has to finish a whole
+// number of cycles in it. Nudging each frequency to the nearest multiple of
+// 1/loop-length Hz does that; the change is far too small to hear.
+float loopSafe(float frequency)
+{
+    return std::round(frequency * MUSIC_LOOP_LENGTH) / MUSIC_LOOP_LENGTH;
+}
+
+std::vector<float> makeMusic()
+{
+    int count = (int)(MUSIC_LOOP_LENGTH * SAMPLE_RATE);
+    std::vector<float> samples(count, 0.0f);
+
+    for (int i = 0; i < count; i++) {
+        float t = (float)i / SAMPLE_RATE;
+        // One full cosine cycle per loop: chord A fades into B and back.
+        float mixA = 0.5f + 0.5f * std::cos(2.0f * PI * t / MUSIC_LOOP_LENGTH);
+        float pad = 0.0f;
+        for (int n = 0; n < 3; n++) {
+            pad += mixA * std::sin(2.0f * PI * loopSafe(CHORD_A[n]) * t);
+            pad += (1.0f - mixA) * std::sin(2.0f * PI * loopSafe(CHORD_B[n]) * t);
+        }
+        samples[i] = PAD_VOLUME * pad;
+    }
+
+    // Crickets: each chirp is a few short pulses of a high tone, at random
+    // (but repeatable) moments through the loop.
+    SetRandomSeed(CRICKET_SEED);
+    float chirpLength = CRICKET_PULSES * CRICKET_PULSE_GAP;
+    for (int c = 0; c < CRICKET_CHIRPS; c++) {
+        float start = GetRandomValue(0, (int)((MUSIC_LOOP_LENGTH - chirpLength) * 1000)) / 1000.0f;
+        for (int p = 0; p < CRICKET_PULSES; p++) {
+            int first = (int)((start + p * CRICKET_PULSE_GAP) * SAMPLE_RATE);
+            int length = (int)(CRICKET_PULSE_LENGTH * SAMPLE_RATE);
+            for (int k = 0; k < length && first + k < count; k++) {
+                float t = (float)k / SAMPLE_RATE;
+                float shape = std::sin(PI * k / length); // swell and fade, no clicks
+                samples[first + k] += CRICKET_VOLUME * shape * std::sin(2.0f * PI * CRICKET_PITCH * t);
+            }
+        }
+    }
+    // Put the shared random generator back to an unpredictable seed for gameplay.
+    SetRandomSeed((unsigned int)std::time(nullptr));
+    return samples;
+}
 }
 
 Audio::Audio()
+    : music(toPcm(makeMusic())),
+      musicPosition(0)
 {
+    SetAudioStreamBufferSizeDefault(MUSIC_CHUNK);
+    musicStream = LoadAudioStream(SAMPLE_RATE, 16, 1);
+    PlayAudioStream(musicStream);
+
     for (int semitones : CHIME_SEMITONES) {
         // Each semitone multiplies the frequency by the twelfth root of 2.
         float frequency = CHIME_LOWEST_NOTE * std::pow(2.0f, semitones / 12.0f);
@@ -63,8 +137,23 @@ Audio::Audio()
 
 Audio::~Audio()
 {
+    UnloadAudioStream(musicStream);
     for (Sound& chime : chimes) {
         UnloadSound(chime);
+    }
+}
+
+void Audio::update()
+{
+    // Whenever the stream has used up a chunk, hand it the next one, wrapping
+    // round to the start of the loop when we reach the end.
+    while (IsAudioStreamProcessed(musicStream)) {
+        short chunk[MUSIC_CHUNK];
+        for (int i = 0; i < MUSIC_CHUNK; i++) {
+            chunk[i] = music[musicPosition];
+            musicPosition = (musicPosition + 1) % music.size();
+        }
+        UpdateAudioStream(musicStream, chunk, MUSIC_CHUNK);
     }
 }
 

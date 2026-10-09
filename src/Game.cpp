@@ -173,6 +173,8 @@ void Game::loadEvenings()
 
 void Game::update(float dt)
 {
+    audio.update(); // the music plays on every screen
+
     switch (screen) {
     case Screen::EveningSelect:
         updateEveningSelect();

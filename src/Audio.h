@@ -17,9 +17,17 @@ public:
     Audio(const Audio&) = delete;
     Audio& operator=(const Audio&) = delete;
 
+    // Keeps the ambient music fed; call once per frame.
+    void update();
+
     // A chime for the string's load reaching this size; bigger loads ring higher.
     void playCatch(int loadSize);
 
 private:
     std::vector<Sound> chimes; // one per note, lowest first
+
+    // The ambient loop, played by handing the stream one chunk at a time.
+    std::vector<short> music;
+    size_t musicPosition;      // next sample of `music` to hand over
+    AudioStream musicStream;
 };
