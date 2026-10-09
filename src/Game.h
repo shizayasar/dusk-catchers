@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Critter.h"
+#include "Evening.h"
 #include "Firefly.h"
 #include "Lantern.h"
 #include "LightString.h"
@@ -35,6 +36,7 @@ private:
     int countLitLanterns() const;
     bool allLanternsLit() const;
 
+    Evening evening; // the evening being played; everything below is built from it
     Critter critter1;
     Critter critter2;
     // Pointers, because each kind is a different subclass with its own size.

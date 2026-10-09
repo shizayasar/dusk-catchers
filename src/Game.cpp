@@ -11,7 +11,7 @@
 #include "raymath.h"
 
 namespace {
-const float ROUND_LENGTH = 180.0f; // seconds from sunset to full dark
+const char* const FIRST_EVENING_FILE = "evenings/01-first-light.txt";
 
 // The sky fades from the first color to the second over the round.
 const Color SUNSET_SKY_COLOR = {72, 52, 104, 255}; // dusky purple
@@ -31,34 +31,15 @@ const float CONTROLS_HINT_SHOW_TIME = 5.0f; // seconds fully visible
 const float CONTROLS_HINT_FADE_TIME = 1.5f; // seconds to fade away after that
 const float CONTROLS_HINT_OFFSET = 28.0f;   // pixels below the critter's center
 
-const Vector2 CRITTER1_START = {320.0f, 270.0f};
-const Vector2 CRITTER2_START = {640.0f, 270.0f};
 const Color CRITTER1_COLOR = {240, 170, 190, 255}; // soft pink
 const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
 const ControlKeys CRITTER1_KEYS = {KEY_W, KEY_S, KEY_A, KEY_D};
 const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 
-const int FIREFLY_COUNT = 12; // delivered fireflies are replaced to keep this many
-// Chances out of 100 for each new firefly's kind; the rest are common.
-// Milestone 6 will move the mix into each evening's data file.
-const int SHY_CHANCE = 30;
-const int PAIR_CHANCE = 20;
-
 // A golden firefly appears beside the middle of the string once both critters
 // have stood still this long, if there isn't one out already.
 const float GOLDEN_STILL_TIME = 2.0f;
 const float GOLDEN_SPAWN_OFFSET = 50.0f; // pixels to the side of the string
-
-// Fireflies spawn in the meadow (left side); the village is on the right.
-const int MEADOW_LEFT = 40;
-const int MEADOW_RIGHT = 600;
-const int MEADOW_TOP = 40;
-const int MEADOW_BOTTOM = 500;
-
-const Vector2 LANTERN_POSITIONS[] = {
-    {720.0f, 100.0f}, {860.0f, 140.0f}, {780.0f, 230.0f}, {900.0f, 290.0f},
-    {700.0f, 370.0f}, {830.0f, 410.0f}, {910.0f, 480.0f},
-};
 
 // Each extra firefly in a load is worth one more point than the last
 // (1, 3, 6, 10, ...), so one big careful delivery beats several small ones.
@@ -82,15 +63,19 @@ void drawCenteredText(const char* text, int y, int fontSize, Color color)
 }
 
 Game::Game()
-    : critter1(CRITTER1_START, CRITTER1_COLOR, CRITTER1_KEYS),
-      critter2(CRITTER2_START, CRITTER2_COLOR, CRITTER2_KEYS),
+    : critter1(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS),
+      critter2(evening.critter2Start, CRITTER2_COLOR, CRITTER2_KEYS),
       lightString(critter1, critter2, fireflies),
       screen(Screen::Playing),
-      timeLeft(ROUND_LENGTH),
+      timeLeft(0.0f),
       score(0),
       biggestDelivery(0),
       stillTimer(0.0f)
 {
+    if (!evening.loadFromFile(FIRST_EVENING_FILE)) {
+        TraceLog(LOG_ERROR, "GAME: Couldn't load %s; run the game from the project folder",
+                 FIRST_EVENING_FILE);
+    }
     startRound();
 }
 
@@ -124,23 +109,23 @@ void Game::startRound()
 {
     // Replacing the critters with fresh ones puts them back at their start spots.
     // The string keeps working because it refers to these same two members.
-    critter1 = Critter(CRITTER1_START, CRITTER1_COLOR, CRITTER1_KEYS);
-    critter2 = Critter(CRITTER2_START, CRITTER2_COLOR, CRITTER2_KEYS);
+    critter1 = Critter(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS);
+    critter2 = Critter(evening.critter2Start, CRITTER2_COLOR, CRITTER2_KEYS);
     // The critters just jumped back to their start spots; don't let the string
     // mistake that for a violent yank.
     lightString.reset();
 
     fireflies.clear();
-    for (int i = 0; i < FIREFLY_COUNT; i++) {
+    for (int i = 0; i < evening.fireflyCount; i++) {
         spawnFirefly();
     }
 
     lanterns.clear();
-    for (Vector2 position : LANTERN_POSITIONS) {
+    for (Vector2 position : evening.lanterns) {
         lanterns.push_back(Lantern(position));
     }
 
-    timeLeft = ROUND_LENGTH;
+    timeLeft = evening.length;
     score = 0;
     biggestDelivery = 0;
     stillTimer = 0.0f;
@@ -161,10 +146,12 @@ void Game::updatePlaying(float dt)
     lightString.update(dt);
 
     deliverToLanterns();
-    updateGoldenSpawning(dt);
+    if (evening.goldenFireflies) {
+        updateGoldenSpawning(dt);
+    }
 
     // Top the meadow back up so there is always something to catch.
-    while ((int)fireflies.size() < FIREFLY_COUNT) {
+    while ((int)fireflies.size() < evening.fireflyCount) {
         spawnFirefly();
     }
 
@@ -176,7 +163,7 @@ void Game::updatePlaying(float dt)
 
 void Game::drawPlaying() const
 {
-    float progress = 1.0f - timeLeft / ROUND_LENGTH; // 0 at sunset, 1 at full dark
+    float progress = 1.0f - timeLeft / evening.length; // 0 at sunset, 1 at full dark
     ClearBackground(ColorLerp(SUNSET_SKY_COLOR, NIGHT_SKY_COLOR, progress));
 
     for (const Lantern& lantern : lanterns) {
@@ -225,7 +212,7 @@ void Game::drawHud() const
 void Game::drawControlsHint() const
 {
     // 1 while fully visible, then falling to 0 over the fade time.
-    float elapsed = ROUND_LENGTH - timeLeft;
+    float elapsed = evening.length - timeLeft;
     float alpha = 1.0f - (elapsed - CONTROLS_HINT_SHOW_TIME) / CONTROLS_HINT_FADE_TIME;
     alpha = std::clamp(alpha, 0.0f, 1.0f);
     if (alpha <= 0.0f) {
@@ -239,14 +226,19 @@ void Game::drawControlsHint() const
 
 void Game::spawnFirefly()
 {
+    const Rectangle& meadow = evening.meadow;
     Vector2 spawn = {
-        (float)GetRandomValue(MEADOW_LEFT, MEADOW_RIGHT),
-        (float)GetRandomValue(MEADOW_TOP, MEADOW_BOTTOM),
+        (float)GetRandomValue((int)meadow.x, (int)(meadow.x + meadow.width)),
+        (float)GetRandomValue((int)meadow.y, (int)(meadow.y + meadow.height)),
     };
-    int roll = GetRandomValue(1, 100);
-    if (roll <= SHY_CHANCE) {
+
+    // Each kind's weight is its share of the total: with common 60, shy 40,
+    // a roll of 1-40 is shy and 41-100 is common.
+    int total = evening.commonWeight + evening.shyWeight + evening.pairWeight;
+    int roll = GetRandomValue(1, total);
+    if (roll <= evening.shyWeight) {
         fireflies.push_back(std::make_unique<ShyFirefly>(spawn));
-    } else if (roll <= SHY_CHANCE + PAIR_CHANCE) {
+    } else if (roll <= evening.shyWeight + evening.pairWeight) {
         fireflies.push_back(std::make_unique<PairFirefly>(spawn));
     } else {
         fireflies.push_back(std::make_unique<CommonFirefly>(spawn));
@@ -313,5 +305,5 @@ int Game::countLitLanterns() const
 
 bool Game::allLanternsLit() const
 {
-    return countLitLanterns() == (int)lanterns.size();
+    return !lanterns.empty() && countLitLanterns() == (int)lanterns.size();
 }
