@@ -54,6 +54,11 @@ const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
 const ControlKeys CRITTER1_KEYS = {KEY_W, KEY_S, KEY_A, KEY_D};
 const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 
+// Free fireflies stay at least this far beyond a lantern's edge. The string
+// catches fireflies within 10 pixels, so this leaves room to sweep past one
+// without brushing the lantern and delivering by accident.
+const float LANTERN_CLEAR_ZONE = 30.0f;
+
 // Shake meter per second while the string crosses a tree or fence.
 const float SNAG_STRAIN = 1.2f;
 
@@ -269,6 +274,9 @@ void Game::updatePlaying(float dt)
         firefly->update(dt, critter1.getPosition(), critter2.getPosition());
         for (const Obstacle& obstacle : evening.obstacles) {
             firefly->keepClearOf(obstacle);
+        }
+        for (const Lantern& lantern : lanterns) {
+            firefly->keepClearOf(lantern.getPosition(), lantern.getRadius() + LANTERN_CLEAR_ZONE);
         }
     }
     // Last, so it sees where everything is now and has the final say on where

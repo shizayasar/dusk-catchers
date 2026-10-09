@@ -72,6 +72,14 @@ void Firefly::keepClearOf(const Obstacle& obstacle)
     moveCenterTo(obstacle.pushOut(getCenter(), getReach()));
 }
 
+void Firefly::keepClearOf(Vector2 center, float radius)
+{
+    if (clinging) {
+        return;
+    }
+    moveCenterTo(Obstacle::pushOutOfCircle(getCenter(), getReach(), center, radius));
+}
+
 float Firefly::getReach() const
 {
     return REACH;
