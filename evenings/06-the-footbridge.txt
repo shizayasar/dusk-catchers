@@ -1,0 +1,24 @@
+# Evening 6: The footbridge
+# A stream runs between the meadow and the village. Critters can't wade
+# through it, and the only way across is a footbridge too narrow for two
+# side by side, so cross single file. The string can pass over the water.
+
+name The footbridge
+critters 160 270 400 270
+meadow 40 40 460 460
+mix common 50 shy 25 pair 25
+
+# The stream, in two parts with a 60-pixel gap between them. (x y width height)
+water 560 0 80 240
+water 560 300 80 240
+# The bridge is drawn over the gap, a little wider than the stream.
+bridge 548 240 104 60
+
+# The village, across the stream.
+lantern 720 100
+lantern 860 90
+lantern 790 200
+lantern 910 260
+lantern 730 330
+lantern 850 400
+lantern 750 470

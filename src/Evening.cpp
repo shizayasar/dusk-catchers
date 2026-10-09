@@ -106,5 +106,17 @@ bool Evening::readSetting(const std::string& key, std::istringstream& values)
         obstacles.push_back(Obstacle::fence(area));
         return true;
     }
+    if (key == "water" || key == "bridge") {
+        Rectangle area;
+        if (!(values >> area.x >> area.y >> area.width >> area.height)) {
+            return false;
+        }
+        if (key == "water") {
+            obstacles.push_back(Obstacle::water(area));
+        } else {
+            bridges.push_back(Bridge(area));
+        }
+        return true;
+    }
     return false; // not a setting we know
 }

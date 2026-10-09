@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "Bridge.h"
 #include "Obstacle.h"
 #include "raylib.h"
 
@@ -31,6 +32,7 @@ public:
     float windDirection = 0.0f;               // degrees: 0 blows right, 90 down, 180 left
     std::vector<Vector2> lanterns;
     std::vector<Obstacle> obstacles;
+    std::vector<Bridge> bridges;
 
 private:
     // Applies one line's setting. Returns false if the line doesn't make sense.

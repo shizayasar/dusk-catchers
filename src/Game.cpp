@@ -326,6 +326,9 @@ void Game::drawPlaying() const
     for (const Obstacle& obstacle : evening.obstacles) {
         obstacle.draw();
     }
+    for (const Bridge& bridge : evening.bridges) {
+        bridge.draw(); // after the water, so the planks sit on top
+    }
     for (const Lantern& lantern : lanterns) {
         lantern.draw();
     }
