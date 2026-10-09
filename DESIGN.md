@@ -87,8 +87,12 @@ The code is a handful of classes, each with `update(dt)` and `draw()`; there is 
 | `Game` | 1 | Owns every object. Loads each evening from data and keeps score. Each frame: input, then update, then draw. Switches screens: Title, Evening select, Playing, Results. |
 | `Critter` | 2 | Position and speed. Reads its own keys or gamepad. |
 | `LightString` | 1 | The line between the two critters. Picks up fireflies it touches (line-vs-circle test), carries them, drops them if shaken, and delivers its load to a lantern. |
-| `Firefly` | many | Has a kind (common, shy, pair, golden) and moves according to its kind. |
-| `Lantern` | many | Lit or unlit; its glow grows with the size of the load delivered. |
+| `Firefly` | many | Base class for every kind: drifting, clinging, riding the string and letting go. `CommonFirefly`, `ShyFirefly`, `PairFirefly` and `GoldenFirefly` override only what makes each kind different. |
+| `Lantern` | many | Lit or unlit; its glow grows with the size of the load delivered. A big lantern needs a minimum load. |
+| `Evening` | 7 | One evening's settings, read from a text file in `evenings/`. |
+| `Obstacle` | many | A tree, fence or water. Blocks critters; trees and fences snag the string. |
+| `Bridge` | few | Planks drawn over a gap in the water. |
+| `Wind` | 1 | Gusts that push the critters and strain the string like a sail. |
 
 The string does most of the work: it reads the critters' positions, picks up any firefly it touches, drops them when shaken, and hands its load to a lantern.
 
