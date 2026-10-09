@@ -29,6 +29,13 @@ const Color TITLE_COLOR = {255, 220, 150, 255}; // warm lantern yellow
 const Color TEXT_COLOR = {255, 245, 225, 230};
 const Color HINT_COLOR = {255, 245, 225, 140};
 
+// Title screen.
+const int GAME_TITLE_SIZE = 64;
+const int TITLE_FIREFLY_COUNT = 14;
+const int MODE_TOP = 300;          // y of the first mode option
+const int MODE_ROW_HEIGHT = 50;
+const Rectangle MODE_HIGHLIGHT_SIZE = {380.0f, 0.0f, 200.0f, 42.0f}; // x and size of the box
+
 // Evening select list.
 const int LIST_TOP = 120;         // y of the first row
 const int LIST_ROW_HEIGHT = 44;
@@ -131,16 +138,23 @@ void drawStarRow(Vector2 left, int earned)
 
 Game::Game()
     : selectedEvening(0),
+      solo(true),
       critter1(evening.critter1Start, CRITTER1_COLOR, CRITTER1_KEYS),
       critter2(evening.critter2Start, CRITTER2_COLOR, CRITTER2_KEYS),
       lightString(critter1, critter2, fireflies),
-      screen(Screen::EveningSelect),
+      screen(Screen::Title),
       timeLeft(0.0f),
       score(0),
       biggestDelivery(0),
       stillTimer(0.0f)
 {
     loadEvenings();
+
+    for (int i = 0; i < TITLE_FIREFLY_COUNT; i++) {
+        Vector2 spot = {(float)GetRandomValue(40, GetScreenWidth() - 40),
+                        (float)GetRandomValue(40, GetScreenHeight() - 40)};
+        titleFireflies.push_back(std::make_unique<CommonFirefly>(spot));
+    }
 }
 
 void Game::loadEvenings()
@@ -176,6 +190,9 @@ void Game::update(float dt)
     audio.update(); // the music plays on every screen
 
     switch (screen) {
+    case Screen::Title:
+        updateTitle(dt);
+        break;
     case Screen::EveningSelect:
         updateEveningSelect();
         break;
@@ -199,6 +216,9 @@ void Game::update(float dt)
 void Game::draw()
 {
     switch (screen) {
+    case Screen::Title:
+        drawTitle();
+        break;
     case Screen::EveningSelect:
         drawEveningSelect();
         break;
@@ -208,6 +228,23 @@ void Game::draw()
     case Screen::Results:
         drawResults();
         break;
+    }
+}
+
+void Game::updateTitle(float dt)
+{
+    // No critters on the title screen, so tell the fireflies they're far away.
+    Vector2 nowhere = {-1000.0f, -1000.0f};
+    for (std::unique_ptr<Firefly>& firefly : titleFireflies) {
+        firefly->update(dt, nowhere, nowhere);
+    }
+
+    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+        solo = !solo; // only two choices, so up and down both switch
+    }
+    if (IsKeyPressed(KEY_ENTER)) {
+        lightString.setSolo(solo);
+        screen = Screen::EveningSelect;
     }
 }
 
@@ -322,10 +359,44 @@ void Game::updatePlaying(float dt)
     }
 }
 
+void Game::drawTitle() const
+{
+    ClearBackground(NIGHT_SKY_COLOR);
+    BeginBlendMode(BLEND_ADDITIVE);
+    for (const std::unique_ptr<Firefly>& firefly : titleFireflies) {
+        firefly->draw();
+    }
+    EndBlendMode();
+
+    drawCenteredText("Dusk Catchers", 110, GAME_TITLE_SIZE, TITLE_COLOR);
+    drawCenteredText("Catch fireflies on a string of light and carry them home together",
+                     195, HUD_FONT_SIZE, HINT_COLOR);
+
+    const char* options[] = {"Solo", "Co-op"};
+    for (int i = 0; i < 2; i++) {
+        bool chosen = (i == 0) == solo;
+        int y = MODE_TOP + i * MODE_ROW_HEIGHT;
+        if (chosen) {
+            Rectangle box = MODE_HIGHLIGHT_SIZE;
+            box.y = (float)y - 9.0f;
+            DrawRectangleRounded(box, 0.4f, 8, HIGHLIGHT_COLOR);
+        }
+        drawCenteredText(options[i], y, LINE_SIZE, chosen ? TITLE_COLOR : TEXT_COLOR);
+    }
+    drawCenteredText(solo ? "One player steers both critters, with both hands"
+                          : "Two players share one keyboard",
+                     MODE_TOP + 2 * MODE_ROW_HEIGHT + 10, HUD_FONT_SIZE, HINT_COLOR);
+
+    drawCenteredText("Up / Down to choose, Enter to start", GetScreenHeight() - 40,
+                     HUD_FONT_SIZE, HINT_COLOR);
+}
+
 void Game::drawEveningSelect() const
 {
     ClearBackground(NIGHT_SKY_COLOR);
     drawCenteredText("Choose an evening", 50, TITLE_SIZE, TITLE_COLOR);
+    const char* mode = solo ? "Solo" : "Co-op";
+    DrawText(mode, GetScreenWidth() - MeasureText(mode, HUD_FONT_SIZE) - 16, 16, HUD_FONT_SIZE, HINT_COLOR);
 
     if (evenings.empty()) {
         drawCenteredText("No evenings found.", 230, LINE_SIZE, TEXT_COLOR);

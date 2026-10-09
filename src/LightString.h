@@ -19,6 +19,9 @@ public:
     // Forget past movement and calm the string, e.g. when a new round starts and
     // the critters jump back to their start spots.
     void reset();
+    // Solo play: one person steers both critters, so the string is longer and
+    // fireflies cling more tightly.
+    void setSolo(bool solo);
 
     void update(float dt);
     // Strain from outside the string (snagging on a tree, wind) for this frame,
@@ -48,4 +51,6 @@ private:
     Vector2 previousEnd;
     float shake;           // 0 = calm, 1 = a firefly falls off
     float outsideStrain;   // from addStrain(), used up each update
+    float maxLength;       // stretching past this strains the string
+    float strainScale;     // all strain is multiplied by this (lower = tighter grip)
 };

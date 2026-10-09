@@ -14,6 +14,8 @@ const Color HALO_COLOR = {255, 210, 110, 60};  // same hue, mostly transparent
 
 // Shaking loose. The shake meter runs from 0 (calm) to 1 (a firefly falls off).
 const float MAX_LENGTH = 360.0f;          // pixels; stretching past this strains the string
+const float SOLO_MAX_LENGTH = 460.0f;     // one person can't keep the critters as close
+const float SOLO_STRAIN_SCALE = 0.6f;     // in solo, the meter fills this much as fast
 const float SAFE_PULL_SPEED = 250.0f;     // how fast the ends may move apart from each other
                                           // (pixels per second) before it counts as yanking
 const float SHAKE_PER_PULL_SPEED = 1.0f / 250.0f; // meter per second, per px/s over the limit
@@ -50,7 +52,9 @@ LightString::LightString(const Critter& startCritter, const Critter& endCritter,
       previousStart(start),
       previousEnd(end),
       shake(0.0f),
-      outsideStrain(0.0f)
+      outsideStrain(0.0f),
+      maxLength(MAX_LENGTH),
+      strainScale(1.0f)
 {
 }
 
@@ -60,6 +64,12 @@ void LightString::reset()
     end = previousEnd = endCritter.getPosition();
     shake = 0.0f;
     outsideStrain = 0.0f;
+}
+
+void LightString::setSolo(bool solo)
+{
+    maxLength = solo ? SOLO_MAX_LENGTH : MAX_LENGTH;
+    strainScale = solo ? SOLO_STRAIN_SCALE : 1.0f;
 }
 
 void LightString::addStrain(float strainPerSecond)
@@ -99,7 +109,7 @@ void LightString::updateShake(float dt)
     Vector2 startVelocity = Vector2Scale(Vector2Subtract(start, previousStart), 1.0f / dt);
     Vector2 endVelocity = Vector2Scale(Vector2Subtract(end, previousEnd), 1.0f / dt);
     float pullSpeed = Vector2Length(Vector2Subtract(startVelocity, endVelocity));
-    float overStretch = Vector2Distance(start, end) - MAX_LENGTH;
+    float overStretch = Vector2Distance(start, end) - maxLength;
 
     float strain = outsideStrain;
     outsideStrain = 0.0f; // used up; Game adds it again each frame it still applies
@@ -111,7 +121,7 @@ void LightString::updateShake(float dt)
     }
 
     if (strain > 0.0f) {
-        shake += strain * dt;
+        shake += strain * strainScale * dt;
     } else {
         shake -= CALM_DOWN_RATE * dt;
     }
