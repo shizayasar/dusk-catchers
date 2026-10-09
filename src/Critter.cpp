@@ -39,3 +39,8 @@ void Critter::draw() const
 {
     DrawCircleV(position, RADIUS, color);
 }
+
+float Critter::getRadius() const
+{
+    return RADIUS;
+}

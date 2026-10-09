@@ -86,5 +86,22 @@ bool Evening::readSetting(const std::string& key, std::istringstream& values)
         lanterns.push_back(position);
         return true;
     }
+    if (key == "tree") {
+        Vector2 center;
+        float radius = 0.0f;
+        if (!(values >> center.x >> center.y >> radius)) {
+            return false;
+        }
+        obstacles.push_back(Obstacle::tree(center, radius));
+        return true;
+    }
+    if (key == "fence") {
+        Rectangle area;
+        if (!(values >> area.x >> area.y >> area.width >> area.height)) {
+            return false;
+        }
+        obstacles.push_back(Obstacle::fence(area));
+        return true;
+    }
     return false; // not a setting we know
 }

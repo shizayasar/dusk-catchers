@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "Obstacle.h"
 #include "raylib.h"
 
 // Everything that makes one evening different, read from a small text file in
@@ -27,6 +28,7 @@ public:
     int pairWeight = 0;
     bool goldenFireflies = false;             // can golden ones appear?
     std::vector<Vector2> lanterns;
+    std::vector<Obstacle> obstacles;
 
 private:
     // Applies one line's setting. Returns false if the line doesn't make sense.

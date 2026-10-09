@@ -21,6 +21,9 @@ public:
     void reset();
 
     void update(float dt);
+    // Strain from outside the string (snagging on a tree, wind) for this frame,
+    // in shake meter per second. It's added in on the next update().
+    void addStrain(float strainPerSecond);
     void draw() const;
 
     // How many fireflies are clinging to the string right now (a pair counts as 2).
@@ -44,4 +47,5 @@ private:
     Vector2 previousStart; // last frame's ends, used to measure how fast they move
     Vector2 previousEnd;
     float shake;           // 0 = calm, 1 = a firefly falls off
+    float outsideStrain;   // from addStrain(), used up each update
 };

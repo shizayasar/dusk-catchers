@@ -54,6 +54,9 @@ const Color CRITTER2_COLOR = {160, 220, 200, 255}; // soft mint
 const ControlKeys CRITTER1_KEYS = {KEY_W, KEY_S, KEY_A, KEY_D};
 const ControlKeys CRITTER2_KEYS = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT};
 
+// Shake meter per second while the string crosses a tree or fence.
+const float SNAG_STRAIN = 1.2f;
+
 // A golden firefly appears beside the middle of the string once both critters
 // have stood still this long, if there isn't one out already.
 const float GOLDEN_STILL_TIME = 2.0f;
@@ -247,6 +250,14 @@ void Game::updatePlaying(float dt)
 
     critter1.update(dt);
     critter2.update(dt);
+    for (const Obstacle& obstacle : evening.obstacles) {
+        critter1.setPosition(obstacle.pushOut(critter1.getPosition(), critter1.getRadius()));
+        critter2.setPosition(obstacle.pushOut(critter2.getPosition(), critter2.getRadius()));
+        if (obstacle.snags(critter1.getPosition(), critter2.getPosition())) {
+            lightString.addStrain(SNAG_STRAIN);
+        }
+    }
+
     for (std::unique_ptr<Firefly>& firefly : fireflies) {
         firefly->update(dt, critter1.getPosition(), critter2.getPosition());
     }
@@ -303,6 +314,9 @@ void Game::drawPlaying() const
     float progress = 1.0f - timeLeft / evening.length; // 0 at sunset, 1 at full dark
     ClearBackground(ColorLerp(SUNSET_SKY_COLOR, NIGHT_SKY_COLOR, progress));
 
+    for (const Obstacle& obstacle : evening.obstacles) {
+        obstacle.draw();
+    }
     for (const Lantern& lantern : lanterns) {
         lantern.draw();
     }

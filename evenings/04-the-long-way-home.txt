@@ -1,0 +1,29 @@
+# Evening 4: The long way home
+# A fence with two gaps and a few trees stand between the meadow and the
+# village. Critters can't walk through them, and the string snags if it
+# crosses one, so thread it through the gaps together.
+
+name The long way home
+critters 140 270 380 270
+meadow 40 40 440 460
+mix common 60 shy 20 pair 20
+
+# The fence: three sections with gaps at y 150-230 and 340-420. (x y width height)
+fence 560 0 16 150
+fence 560 230 16 110
+fence 560 420 16 120
+
+# Trees on both sides of the fence. (x y radius)
+tree 470 110 30
+tree 480 440 26
+tree 650 290 34
+tree 660 480 24
+
+# The village, beyond the fence.
+lantern 760 90
+lantern 880 150
+lantern 790 230
+lantern 910 300
+lantern 760 380
+lantern 870 430
+lantern 920 500
