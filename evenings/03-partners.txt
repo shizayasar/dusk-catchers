@@ -1,0 +1,17 @@
+# Evening 3: Partners
+# Pair fireflies only cling when one sweep of the string touches both.
+# This time the meadow is on the right and the village on the left.
+
+name Partners
+critters 420 270 680 270
+meadow 380 40 540 460
+mix common 50 shy 20 pair 30
+
+# The village, on the left.
+lantern 60 110
+lantern 180 70
+lantern 120 210
+lantern 250 180
+lantern 70 330
+lantern 200 300
+lantern 140 450
