@@ -19,6 +19,11 @@ public:
     void followString(Vector2 stringStart, Vector2 stringEnd) override;
     void letGo() override;
 
+protected:
+    Vector2 getCenter() const override;
+    float getReach() const override;
+    void moveCenterTo(Vector2 center) override;
+
 private:
     // Put both bodies either side of center, along the link.
     void placeBodiesAround(Vector2 center);

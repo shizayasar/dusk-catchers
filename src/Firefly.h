@@ -2,7 +2,8 @@
 
 #include "raylib.h"
 
-class LightString; // only used by reference here, so the full class isn't needed
+class LightString; // only used by reference here, so the full classes aren't needed
+class Obstacle;
 
 // Base class for every kind of firefly. It holds what all kinds share: drifting
 // in slow loops, clinging to the string, riding along and letting go. Each kind
@@ -32,6 +33,9 @@ public:
     // Fall off the string and go back to drifting.
     virtual void letGo();
 
+    // Push a free firefly back out of an obstacle. Carried ones ride the string.
+    void keepClearOf(const Obstacle& obstacle);
+
     bool isClinging() const { return clinging; }
     // False while clinging, and for a moment after being shaken loose.
     bool canBeCaught() const { return !clinging && catchCooldown <= 0.0f; }
@@ -52,6 +56,13 @@ protected:
     // `point`, pushed back inside the screen so it stays margin pixels from every edge.
     static Vector2 keepOnScreen(Vector2 point, float margin);
     static bool touches(const LightString& string, Vector2 point);
+
+    // The middle of the firefly and how far it reaches from there. Pairs
+    // override these so both bodies are kept clear, not just one.
+    virtual Vector2 getCenter() const { return position; }
+    virtual float getReach() const;
+    // Also keeps the firefly on screen, wherever it's moved to.
+    virtual void moveCenterTo(Vector2 center) { position = keepOnScreen(center, EDGE_MARGIN); }
     static void drawBody(Vector2 at, Color core, Color halo);
     static float randomFloat(float min, float max);
 

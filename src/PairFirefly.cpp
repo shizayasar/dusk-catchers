@@ -35,10 +35,7 @@ void PairFirefly::update(float dt, Vector2 critter1Position, Vector2 critter2Pos
 
     // The pair drifts as one unit around the middle of its link.
     Vector2 center = Vector2Lerp(position, partnerPosition, 0.5f);
-    center = moveForward(center, DRIFT_SPEED, dt);
-    // The bodies stick out half a link from the center, so keep the center that
-    // much further in, or one body could slip past the edge.
-    placeBodiesAround(keepOnScreen(center, EDGE_MARGIN + LINK_LENGTH / 2.0f));
+    moveCenterTo(moveForward(center, DRIFT_SPEED, dt));
 }
 
 void PairFirefly::draw() const
@@ -81,6 +78,24 @@ void PairFirefly::letGo()
     // Carry on spinning from however the string left the link.
     Vector2 link = Vector2Subtract(partnerPosition, position);
     linkAngle = std::atan2(link.y, link.x);
+}
+
+Vector2 PairFirefly::getCenter() const
+{
+    return Vector2Lerp(position, partnerPosition, 0.5f);
+}
+
+float PairFirefly::getReach() const
+{
+    // Half the link out to each body, plus the body itself.
+    return LINK_LENGTH / 2.0f + Firefly::getReach();
+}
+
+void PairFirefly::moveCenterTo(Vector2 center)
+{
+    // The bodies stick out half a link from the center, so keep the center that
+    // much further in, or one body could slip past the edge.
+    placeBodiesAround(keepOnScreen(center, EDGE_MARGIN + LINK_LENGTH / 2.0f));
 }
 
 void PairFirefly::placeBodiesAround(Vector2 center)

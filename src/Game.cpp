@@ -267,6 +267,9 @@ void Game::updatePlaying(float dt)
 
     for (std::unique_ptr<Firefly>& firefly : fireflies) {
         firefly->update(dt, critter1.getPosition(), critter2.getPosition());
+        for (const Obstacle& obstacle : evening.obstacles) {
+            firefly->keepClearOf(obstacle);
+        }
     }
     // Last, so it sees where everything is now and has the final say on where
     // carried fireflies sit.
