@@ -43,9 +43,9 @@ Write one setting per line: a keyword, then its numbers. Anything after `#` is a
 | `wind 90 180` | Gust strength (pixels per second) and direction in degrees (0 right, 90 down, 180 left, 270 up). | calm |
 | `lantern 720 100` | A lantern (x y). Repeat for each one. At least one is required. | — |
 | `biglantern 770 270 10` | A big lantern that needs a single delivery of at least this many fireflies (x y needed). | — |
-| `tree 470 110 30` | A tree (x y radius). Blocks critters and snags the string. | — |
-| `fence 560 0 16 150` | A fence (x y width height). Blocks critters and snags the string. | — |
-| `water 560 0 80 240` | Water (x y width height). Blocks critters; the string passes over it. | — |
+| `tree 470 110 30` | A tree (x y radius). Blocks critters and fireflies, and snags the string. | — |
+| `fence 560 0 16 150` | A fence (x y width height). Blocks critters and fireflies, and snags the string. | — |
+| `water 560 0 80 240` | Water (x y width height). Blocks critters; the string passes over it, and fireflies cross it without lingering. | — |
 | `bridge 548 240 104 60` | Planks drawn over a gap left between two `water` areas (x y width height). | — |
 
 If a line can't be read, the game skips it and logs a warning with the file name and line number.

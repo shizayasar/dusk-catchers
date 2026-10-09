@@ -33,7 +33,8 @@ public:
     // Fall off the string and go back to drifting.
     virtual void letGo();
 
-    // Push a free firefly back out of an obstacle. Carried ones ride the string.
+    // Push a free firefly back out of a tree or fence, or send it toward the
+    // nearest bank if it's over water. Carried ones ride the string.
     void keepClearOf(const Obstacle& obstacle);
     // Push a free firefly back out of a round area, such as around a lantern.
     void keepClearOf(Vector2 center, float radius);
