@@ -30,6 +30,7 @@ add_executable(dusk_catchers
     src/Evening.cpp
     src/Obstacle.cpp
     src/Wind.cpp
+    src/Bridge.cpp
 )
 target_link_libraries(dusk_catchers PRIVATE raylib)
 
