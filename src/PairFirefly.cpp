@@ -51,11 +51,22 @@ void PairFirefly::draw() const
 void PairFirefly::tryToCling(const LightString& string)
 {
     // Both bodies in the same frame: the string has to line up with the link.
-    if (touches(string, position) && touches(string, partnerPosition)) {
-        clinging = true;
-        stringT = string.fractionAlong(position);
-        partnerStringT = string.fractionAlong(partnerPosition);
+    if (!touches(string, position) || !touches(string, partnerPosition)) {
+        return;
     }
+
+    // A body just past a critter would get the very end of the string (0 or 1)
+    // and ride hidden under that critter, looking like it fell off its partner.
+    // So both bodies must be between the critters.
+    float t = string.fractionAlong(position);
+    float partnerT = string.fractionAlong(partnerPosition);
+    if (t <= 0.0f || t >= 1.0f || partnerT <= 0.0f || partnerT >= 1.0f) {
+        return;
+    }
+
+    clinging = true;
+    stringT = t;
+    partnerStringT = partnerT;
 }
 
 void PairFirefly::followString(Vector2 stringStart, Vector2 stringEnd)
