@@ -26,6 +26,10 @@ public:
     // True if the string between these two points crosses us.
     bool snags(Vector2 stringStart, Vector2 stringEnd) const;
 
+    // Where a circle at `point` has to move so it no longer overlaps the circle
+    // at `center`. Shared by trees and anything else round that keeps things out.
+    static Vector2 pushOutOfCircle(Vector2 point, float pointRadius, Vector2 center, float radius);
+
 private:
     Obstacle(Kind kind, Vector2 center, float radius, Rectangle area);
 

@@ -65,17 +65,8 @@ void Obstacle::draw() const
 Vector2 Obstacle::pushOut(Vector2 point, float pointRadius) const
 {
     switch (kind) {
-    case Kind::Tree: {
-        Vector2 away = Vector2Subtract(point, center);
-        float distance = Vector2Length(away);
-        float minimum = radius + pointRadius;
-        if (distance >= minimum) {
-            return point;
-        }
-        // Dead center has no "away" direction, so pick one.
-        Vector2 direction = distance > 0.0f ? Vector2Scale(away, 1.0f / distance) : Vector2{0.0f, -1.0f};
-        return Vector2Add(center, Vector2Scale(direction, minimum));
-    }
+    case Kind::Tree:
+        return pushOutOfCircle(point, pointRadius, center, radius);
     case Kind::Fence:
     case Kind::Water: {
         // The closest point on the rectangle to the circle's center.
@@ -108,6 +99,19 @@ Vector2 Obstacle::pushOut(Vector2 point, float pointRadius) const
     }
     }
     return point;
+}
+
+Vector2 Obstacle::pushOutOfCircle(Vector2 point, float pointRadius, Vector2 center, float radius)
+{
+    Vector2 away = Vector2Subtract(point, center);
+    float distance = Vector2Length(away);
+    float minimum = radius + pointRadius;
+    if (distance >= minimum) {
+        return point;
+    }
+    // Dead center has no "away" direction, so pick one.
+    Vector2 direction = distance > 0.0f ? Vector2Scale(away, 1.0f / distance) : Vector2{0.0f, -1.0f};
+    return Vector2Add(center, Vector2Scale(direction, minimum));
 }
 
 bool Obstacle::snags(Vector2 stringStart, Vector2 stringEnd) const

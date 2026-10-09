@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "LightString.h"
+#include "Obstacle.h"
 #include "raymath.h"
 
 namespace {
@@ -16,6 +17,7 @@ const float CATCH_COOLDOWN = 1.0f;
 
 const float RADIUS = 4.0f;
 const float HALO_RADIUS = 10.0f;
+const float REACH = 6.0f; // how close to an obstacle a firefly's center may get
 }
 
 Firefly::Firefly(Vector2 startPosition)
@@ -60,6 +62,19 @@ void Firefly::letGo()
 {
     clinging = false;
     catchCooldown = CATCH_COOLDOWN;
+}
+
+void Firefly::keepClearOf(const Obstacle& obstacle)
+{
+    if (clinging) {
+        return;
+    }
+    moveCenterTo(obstacle.pushOut(getCenter(), getReach()));
+}
+
+float Firefly::getReach() const
+{
+    return REACH;
 }
 
 void Firefly::wander(float dt)
