@@ -342,10 +342,19 @@ void Game::drawPlaying() const
         lantern.draw();
     }
     wind.draw();
+
+    // Everything that gives off light is added onto what's behind it, so
+    // overlapping glows get brighter instead of covering each other.
+    BeginBlendMode(BLEND_ADDITIVE);
+    for (const Lantern& lantern : lanterns) {
+        lantern.drawGlow();
+    }
     lightString.draw(); // drawn before the critters so they sit on top of its ends
     for (const std::unique_ptr<Firefly>& firefly : fireflies) {
         firefly->draw();
     }
+    EndBlendMode();
+
     critter1.draw();
     critter2.draw();
 
@@ -360,6 +369,11 @@ void Game::drawResults() const
     for (const Lantern& lantern : lanterns) {
         lantern.draw();
     }
+    BeginBlendMode(BLEND_ADDITIVE);
+    for (const Lantern& lantern : lanterns) {
+        lantern.drawGlow();
+    }
+    EndBlendMode();
 
     drawCenteredText(evening.name.c_str(), 110, HUD_FONT_SIZE, HINT_COLOR);
     const char* title = allLanternsLit() ? "Every lantern is lit!" : "Night has fallen";

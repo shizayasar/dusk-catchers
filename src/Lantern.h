@@ -9,7 +9,11 @@ class Lantern {
 public:
     explicit Lantern(Vector2 position, int loadNeeded = 1);
 
+    // The solid lantern. Drawn normally.
     void draw() const;
+    // Its light, if lit. Meant to be drawn with additive blending, so
+    // overlapping glows add up like real light.
+    void drawGlow() const;
 
     void light(int fireflyCount);
 

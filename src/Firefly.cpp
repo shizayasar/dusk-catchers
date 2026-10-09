@@ -17,6 +17,8 @@ const float CATCH_COOLDOWN = 1.0f;
 
 const float RADIUS = 4.0f;
 const float HALO_RADIUS = 10.0f;
+const float OUTER_HALO_RADIUS = 22.0f; // a wide, faint layer so the light fades out softly
+const float OUTER_HALO_STRENGTH = 0.4f; // as a fraction of the inner halo's alpha
 const float REACH = 6.0f; // how close to an obstacle a firefly's center may get
 }
 
@@ -128,6 +130,7 @@ bool Firefly::touches(const LightString& string, Vector2 point)
 
 void Firefly::drawBody(Vector2 at, Color core, Color halo)
 {
+    DrawCircleV(at, OUTER_HALO_RADIUS, Fade(halo, halo.a / 255.0f * OUTER_HALO_STRENGTH));
     DrawCircleV(at, HALO_RADIUS, halo);
     DrawCircleV(at, RADIUS, core);
 }

@@ -7,6 +7,8 @@
 namespace {
 const float CORE_THICKNESS = 3.0f;
 const float HALO_THICKNESS = 10.0f;
+const float OUTER_HALO_THICKNESS = 22.0f;
+const Color OUTER_HALO_COLOR = {255, 200, 100, 22}; // very faint, so the glow fades out softly
 const Color CORE_COLOR = {255, 230, 150, 255}; // warm yellow
 const Color HALO_COLOR = {255, 210, 110, 60};  // same hue, mostly transparent
 
@@ -189,7 +191,9 @@ void LightString::draw() const
         brightness = 1.0f - FLICKER_DIMMING * danger * pulse;
     }
 
-    // A wide faint line under a thin bright one reads as a soft glow.
+    // Wide faint lines under a thin bright one read as a soft glow.
+    DrawLineEx(start, end, OUTER_HALO_THICKNESS,
+               Fade(OUTER_HALO_COLOR, OUTER_HALO_COLOR.a / 255.0f * brightness));
     DrawLineEx(start, end, HALO_THICKNESS, Fade(HALO_COLOR, HALO_COLOR.a / 255.0f * brightness));
     DrawLineEx(start, end, CORE_THICKNESS, Fade(CORE_COLOR, brightness));
 }

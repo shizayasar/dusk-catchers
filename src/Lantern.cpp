@@ -39,6 +39,14 @@ void Lantern::draw() const
         }
         return;
     }
+    DrawCircleV(position, getRadius(), LIT_CORE_COLOR);
+}
+
+void Lantern::drawGlow() const
+{
+    if (!lit) {
+        return;
+    }
 
     int glowFireflies = std::min(fireflyCount, MAX_GLOW_FIREFLIES);
     float glowRadius = BASE_GLOW_RADIUS + GLOW_PER_FIREFLY * (glowFireflies - 1);
@@ -50,7 +58,6 @@ void Lantern::draw() const
     DrawCircleV(position, glowRadius, Fade(LIT_GLOW_COLOR, 0.08f));
     DrawCircleV(position, glowRadius * 0.6f, Fade(LIT_GLOW_COLOR, 0.12f));
     DrawCircleV(position, glowRadius * 0.35f, Fade(LIT_GLOW_COLOR, 0.2f));
-    DrawCircleV(position, getRadius(), LIT_CORE_COLOR);
 }
 
 void Lantern::light(int count)
