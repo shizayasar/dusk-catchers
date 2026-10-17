@@ -41,3 +41,15 @@ if(APPLE)
     target_link_libraries(dusk_catchers PRIVATE
         "-framework IOKit" "-framework Cocoa" "-framework OpenGL")
 endif()
+
+# Browser build: only used when building with Emscripten (emcmake).
+if(EMSCRIPTEN)
+    set_target_properties(dusk_catchers PROPERTIES SUFFIX ".html")
+    target_link_options(dusk_catchers PRIVATE
+        "-sUSE_GLFW=3"
+        "-sGL_ENABLE_GET_PROC_ADDRESS"
+        "-sALLOW_MEMORY_GROWTH=1"
+        "-sEXPORTED_RUNTIME_METHODS=HEAPF32"
+        "--preload-file" "${CMAKE_SOURCE_DIR}/evenings@evenings"
+        "--shell-file" "${CMAKE_SOURCE_DIR}/web/shell.html")
+endif()
