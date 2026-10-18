@@ -3,6 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <title>Dusk Catchers</title>
+    <script>
+      // The game loads its files relative to this page, which needs the
+      // address to end in "/". Add it if someone leaves it off.
+      if (!location.pathname.endsWith("/") && !location.pathname.endsWith(".html"))
+        location.replace(location.pathname + "/" + location.search + location.hash);
+    </script>
     <style>
       html, body { margin: 0; height: 100%; background: #241D33; }
       body { display: grid; place-items: center; }
