@@ -2,6 +2,8 @@
 
 A cozy two-player co-op game: two critters share a glowing string, gather fireflies on it, and carry them home to light the lanterns of a sleeping village. Built in C++17 with [raylib](https://www.raylib.com/).
 
+**[Play it in your browser →](https://www.shizayasar.com/play/dusk-catchers/)**
+
 Work in progress. See [DESIGN.md](DESIGN.md) for the full plan.
 
 ## Build and run (macOS)
