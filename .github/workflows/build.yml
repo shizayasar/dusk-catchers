@@ -1,0 +1,86 @@
+# Builds the game on every push, and publishes the web version to itch.io
+# from main once both builds pass.
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the libraries raylib needs on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libx11-dev libxrandr-dev libxi-dev \
+            libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libwayland-dev libxkbcommon-dev
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Build and package
+        run: sh scripts/package-web.sh
+
+      - name: Save the web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dusk-catchers-web
+          path: build-web/itch/
+
+  publish:
+    name: Publish to itch.io
+    needs: [desktop, web]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      # Set these in the repo's Settings > Secrets and variables > Actions.
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}  # an itch.io API key
+      ITCH_GAME: ${{ vars.ITCH_GAME }}               # e.g. yourname/dusk-catchers
+    steps:
+      - name: Check itch.io is set up
+        id: setup
+        run: |
+          if [ -z "$BUTLER_API_KEY" ] || [ -z "$ITCH_GAME" ]; then
+            echo "itch.io isn't set up yet (BUTLER_API_KEY secret or ITCH_GAME variable missing); skipping."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the web build
+        if: steps.setup.outputs.ready == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dusk-catchers-web
+          path: web
+
+      - name: Install butler (itch.io's upload tool)
+        if: steps.setup.outputs.ready == 'true'
+        run: |
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip
+          chmod +x butler
+
+      - name: Upload to itch.io
+        if: steps.setup.outputs.ready == 'true'
+        run: ./butler push web "$ITCH_GAME:html5" --userversion "${GITHUB_SHA::7}"
