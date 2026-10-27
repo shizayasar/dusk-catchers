@@ -17,6 +17,15 @@ const float CHIME_LOWEST_NOTE = 523.25f; // Hz (C5)
 // two of these notes sound nice together, so overlapping chimes never clash.
 const int CHIME_SEMITONES[] = {0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26};
 
+// Lantern lighting: a rising run of bell notes from one chord. A brighter
+// lantern (a bigger delivery) plays more of the run, so it sounds fuller.
+const float LANTERN_NOTES[] = {261.63f, 392.00f, 523.25f, 659.25f, 783.99f, 1046.50f}; // C G C E G C
+const float LANTERN_NOTE_GAP = 0.08f;     // seconds between one note starting and the next
+const float LANTERN_DECAY = 2.2f;         // slower than a chime, so it rings out longer
+const float LANTERN_RING_LENGTH = 2.2f;   // seconds the last note is given to ring
+const float LANTERN_NOTE_VOLUME = 0.13f;  // per note; six notes together stay well below clipping
+const int FIREFLIES_PER_LANTERN_NOTE = 2; // each two extra fireflies add a note
+
 // Ambient music: a loop of soft chords and crickets.
 const float MUSIC_LOOP_LENGTH = 16.0f; // seconds
 const float PAD_VOLUME = 0.035f;      // per note; six notes share the pad
@@ -55,20 +64,37 @@ Sound soundFromSamples(const std::vector<float>& samples)
     return LoadSoundFromWave(wave); // copies the data, so pcm can go away afterwards
 }
 
-// A bell-like tone: the note plus two quieter harmonics, with a quick fade-in
-// and a long, smooth fade-out.
-std::vector<float> makeChime(float frequency)
+// Adds one bell-like note into `samples`, starting `start` seconds in: the
+// note plus two quieter harmonics, with a quick fade-in and a smooth fade-out.
+void addBell(std::vector<float>& samples, float frequency, float start, float volume, float decay)
 {
-    int count = (int)(CHIME_LENGTH * SAMPLE_RATE);
-    std::vector<float> samples(count);
-    for (int i = 0; i < count; i++) {
-        float t = (float)i / SAMPLE_RATE;
+    int first = (int)(start * SAMPLE_RATE);
+    for (int i = first; i < (int)samples.size(); i++) {
+        float t = (float)(i - first) / SAMPLE_RATE;
         float tone = std::sin(2.0f * PI * frequency * t)
                    + 0.3f * std::sin(2.0f * PI * 2.0f * frequency * t)
                    + 0.1f * std::sin(2.0f * PI * 3.0f * frequency * t);
         float fadeIn = std::min(1.0f, t / CHIME_ATTACK);
-        float fadeOut = std::exp(-CHIME_DECAY * t);
-        samples[i] = CHIME_VOLUME * tone * fadeIn * fadeOut / 1.4f; // 1.4 = loudest the three waves can add to
+        float fadeOut = std::exp(-decay * t);
+        samples[i] += volume * tone * fadeIn * fadeOut / 1.4f; // 1.4 = loudest the three waves can add to
+    }
+}
+
+std::vector<float> makeChime(float frequency)
+{
+    std::vector<float> samples((int)(CHIME_LENGTH * SAMPLE_RATE), 0.0f);
+    addBell(samples, frequency, 0.0f, CHIME_VOLUME, CHIME_DECAY);
+    return samples;
+}
+
+// The first `noteCount` notes of the lantern run, each starting a moment
+// after the last so the sound blooms open like the glow.
+std::vector<float> makeLanternSound(int noteCount)
+{
+    float length = (noteCount - 1) * LANTERN_NOTE_GAP + LANTERN_RING_LENGTH;
+    std::vector<float> samples((int)(length * SAMPLE_RATE), 0.0f);
+    for (int n = 0; n < noteCount; n++) {
+        addBell(samples, LANTERN_NOTES[n], n * LANTERN_NOTE_GAP, LANTERN_NOTE_VOLUME, LANTERN_DECAY);
     }
     return samples;
 }
@@ -133,6 +159,11 @@ Audio::Audio()
         float frequency = CHIME_LOWEST_NOTE * std::pow(2.0f, semitones / 12.0f);
         chimes.push_back(soundFromSamples(makeChime(frequency)));
     }
+
+    int lanternNoteCount = sizeof(LANTERN_NOTES) / sizeof(LANTERN_NOTES[0]);
+    for (int notes = 1; notes <= lanternNoteCount; notes++) {
+        lanternSounds.push_back(soundFromSamples(makeLanternSound(notes)));
+    }
 }
 
 Audio::~Audio()
@@ -140,6 +171,9 @@ Audio::~Audio()
     UnloadAudioStream(musicStream);
     for (Sound& chime : chimes) {
         UnloadSound(chime);
+    }
+    for (Sound& sound : lanternSounds) {
+        UnloadSound(sound);
     }
 }
 
@@ -164,4 +198,16 @@ void Audio::playCatch(int loadSize)
     }
     int note = std::min(loadSize, (int)chimes.size()) - 1;
     PlaySound(chimes[note]);
+}
+
+void Audio::playLanternLit(int fireflyCount)
+{
+    if (lanternSounds.empty() || fireflyCount < 1) {
+        return;
+    }
+    // 1 firefly plays one note, 2-3 play two, 4-5 three, ... and 10 or more
+    // (enough for the big lantern) play the full run.
+    int notes = fireflyCount / FIREFLIES_PER_LANTERN_NOTE + 1;
+    notes = std::clamp(notes, 1, (int)lanternSounds.size());
+    PlaySound(lanternSounds[notes - 1]);
 }

@@ -608,6 +608,7 @@ void Game::deliverToLanterns()
         if (lightString.touches(lantern.getPosition(), lantern.getRadius())) {
             int delivered = lightString.deliverLoad();
             lantern.light(delivered);
+            audio.playLanternLit(delivered);
             particles.burst(lantern.getPosition(),
                             std::min(BURST_MAX_SPARKS,
                                      BURST_BASE_SPARKS + BURST_SPARKS_PER_FIREFLY * delivered));
