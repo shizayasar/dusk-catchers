@@ -2,8 +2,8 @@
 
 #include "raylib.h"
 
-// A village lantern: a glass firefly jar. It starts empty and dark; delivering
-// fireflies lights it, they glow inside, and a bigger delivery makes it brighter. Once lit it stays lit. A big lantern
+// A village lantern: a little glass lamp on a post. It starts dark; delivering
+// fireflies lights it, and a bigger delivery makes it shine brighter. Once lit it stays lit. A big lantern
 // only lights from a single delivery of at least loadNeeded fireflies.
 class Lantern {
 public:

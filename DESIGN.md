@@ -71,7 +71,7 @@ The look is built from shapes and light, so it can look pretty before there is a
 
 - **Palette.** The sky fades from dusky purple to deep navy over the round; fireflies and the string glow warm yellow, and lit lanterns bloom orange across the village.
 - **Glow.** Draw each firefly and the string as a bright core with a few soft, transparent halos, using additive blending so they bloom against the dark.
-- **Lanterns.** Glass firefly jars with a lid and handle: dark and empty when unlit. Once lit, the delivered fireflies glow inside, and the bigger the delivery the brighter the jar and the wider its glow, from a faint amber spot for one firefly to a blaze for a full jar.
+- **Lanterns.** Little glass street lamps on posts, with a pointed cap: dark when unlit. Once lit, the bigger the delivery the brighter the glass and the wider its glow, from a faint amber for one firefly to a blaze of gold for a big load.
 - **Critters.** Start as round shapes with dot eyes that look the way the critter is moving. Swap in sprites from a free asset pack or original pixel art once the game is fun.
 - **Juice.** Each firefly that clings gives a tiny chime that rises in pitch as the load grows. A delivery bursts into particles as the lantern blooms open, with a rising run of bell notes that grows fuller the brighter the lantern is lit. Critters squash and stretch a little as they move.
 - **Sound.** One calm ambient loop (crickets, soft pads) plus the catch chimes, all generated in code from sine waves when the game starts, so there are no audio files or licenses to manage.
