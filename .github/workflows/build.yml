@@ -39,7 +39,15 @@ jobs:
         uses: mymindstorm/setup-emsdk@v14
 
       - name: Build and package
-        run: sh scripts/package-web.sh
+        run: |
+          if ! sh scripts/package-web.sh > web-build.log 2>&1; then
+            cat web-build.log
+            # Also post the end of the log as an error note on the run's
+            # summary page, which anyone can read, unlike the full log.
+            echo "::error title=Web build failed::$(tail -n 25 web-build.log | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')"
+            exit 1
+          fi
+          cat web-build.log
 
       - name: Save the web build
         uses: actions/upload-artifact@v4
