@@ -2,8 +2,8 @@
 
 #include "raylib.h"
 
-// A village lantern: a little glass lamp on a post. It starts dark; delivering
-// fireflies lights it, and a bigger delivery makes it shine brighter. Once lit it stays lit. A big lantern
+// A village lantern. It starts unlit; delivering fireflies lights it, and a
+// bigger delivery makes it glow brighter. Once lit it stays lit. A big lantern
 // only lights from a single delivery of at least loadNeeded fireflies.
 class Lantern {
 public:
@@ -26,8 +26,6 @@ public:
 
 private:
     bool isBig() const { return loadNeeded > 1; }
-    // 0 for one firefly up to 1 for a full jar; sets how bright it shines.
-    float brightness() const;
 
     Vector2 position;
     int loadNeeded;   // smallest delivery that lights it
