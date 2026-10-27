@@ -8,6 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Pinned to a release tag so the build doesn't change underneath us.
 include(FetchContent)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # we only need the library, not raylib's demos
+if(EMSCRIPTEN)
+    # raylib builds for the desktop unless told otherwise, which fails in a
+    # fresh browser build (it goes looking for desktop window libraries).
+    set(PLATFORM Web CACHE STRING "" FORCE)
+endif()
 FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
