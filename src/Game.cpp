@@ -529,7 +529,7 @@ void Game::drawHowToPlay() const
     Vector2 left = {290.0f, PICTURE_Y};
     Vector2 right = {530.0f, PICTURE_Y};
     Lantern lantern({700.0f, PICTURE_Y});
-    lantern.light(2); // a small glow, so it stays between the title and the steps
+    lantern.light(3); // a modest glow, so it stays between the title and the steps
     lantern.update(1.0f); // fully bloomed
     lantern.draw();
     BeginBlendMode(BLEND_ADDITIVE);
