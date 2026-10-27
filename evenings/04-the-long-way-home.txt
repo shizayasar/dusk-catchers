@@ -4,6 +4,7 @@
 # crosses one, so thread it through the gaps together.
 
 name The long way home
+tip Critters can't walk through fences or trees, and the string snags if it crosses one. Go through the gaps together.
 critters 140 270 380 270
 meadow 40 40 440 460
 mix common 60 shy 20 pair 20

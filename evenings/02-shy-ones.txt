@@ -3,6 +3,7 @@
 # using the length of the string.
 
 name Shy ones
+tip Mint fireflies are shy and dart away from critters. Keep your distance and catch them with the middle of the string.
 critters 300 380 560 380
 meadow 40 60 560 440
 mix common 60 shy 40

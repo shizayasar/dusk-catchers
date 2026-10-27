@@ -4,6 +4,7 @@
 # it short when a gust comes.
 
 name Breezy night
+tip Gusts push you along and tug the string like a sail. When the streaks brighten, keep the string short and pointed into the wind.
 critters 160 270 400 270
 meadow 40 40 480 460
 mix common 50 shy 25 pair 25

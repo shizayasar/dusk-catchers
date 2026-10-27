@@ -4,6 +4,7 @@
 # the town square with a single delivery of at least 10 fireflies.
 
 name Festival night
+tip Stand still together to call a golden firefly, worth 3 but easily shaken off. The big lantern needs 10 fireflies in one delivery.
 critters 140 270 360 270
 fireflies 14
 meadow 40 40 400 460

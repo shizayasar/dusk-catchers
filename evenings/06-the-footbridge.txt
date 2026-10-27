@@ -4,6 +4,7 @@
 # side by side, so cross single file. The string can pass over the water.
 
 name The footbridge
+tip Only one critter fits on the footbridge at a time, so cross single file. The string can pass over the water.
 critters 160 270 400 270
 meadow 40 40 460 460
 mix common 50 shy 25 pair 25

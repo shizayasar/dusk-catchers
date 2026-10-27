@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -44,6 +45,15 @@ const int LIST_LEFT = 250;        // x of the evening names
 const int LIST_STARS_X = 640;     // x of the first star in each row
 const Rectangle HIGHLIGHT_SIZE = {220.0f, 0.0f, 520.0f, 38.0f}; // x and size of the selected row's box
 const Color HIGHLIGHT_COLOR = {255, 220, 150, 40};
+
+// How-to-play page.
+const float PICTURE_Y = 140.0f;          // the little picture of the game
+const Color PICTURE_STRING_COLOR = {255, 230, 150, 255};
+const Color PICTURE_ARROW_COLOR = {255, 245, 225, 120};
+const int STEPS_TOP = 205;               // y of the first how-to-play step
+const int STEP_SPACING = 30;
+const int TIP_TOP = 380;                 // y of the "Tonight" heading
+const int TIP_WIDTH = 760;               // the tip wraps onto new lines past this width
 
 // Stars.
 const float STAR_OUTER_RADIUS = 12.0f;
@@ -127,6 +137,28 @@ void drawStar(Vector2 center, Color color)
     }
 }
 
+// raylib draws text on one line, so break `text` into lines no wider than
+// maxWidth (adding words one at a time) and center each line.
+void drawWrappedCenteredText(const std::string& text, int y, int fontSize, int maxWidth, Color color)
+{
+    std::istringstream words(text);
+    std::string word;
+    std::string line;
+    while (words >> word) {
+        std::string longer = line.empty() ? word : line + " " + word;
+        if (!line.empty() && MeasureText(longer.c_str(), fontSize) > maxWidth) {
+            drawCenteredText(line.c_str(), y, fontSize, color);
+            y += fontSize + 6;
+            line = word;
+        } else {
+            line = longer;
+        }
+    }
+    if (!line.empty()) {
+        drawCenteredText(line.c_str(), y, fontSize, color);
+    }
+}
+
 // Three stars in a row starting at `left`, the first `earned` of them gold.
 void drawStarRow(Vector2 left, int earned)
 {
@@ -197,6 +229,13 @@ void Game::update(float dt)
     case Screen::EveningSelect:
         updateEveningSelect();
         break;
+    case Screen::HowToPlay:
+        if (IsKeyPressed(KEY_ENTER)) {
+            startRound();
+        } else if (IsKeyPressed(KEY_ESCAPE)) {
+            screen = Screen::EveningSelect;
+        }
+        break;
     case Screen::Playing:
         if (IsKeyPressed(KEY_ESCAPE)) {
             screen = Screen::Paused;
@@ -233,6 +272,9 @@ void Game::draw()
         break;
     case Screen::EveningSelect:
         drawEveningSelect();
+        break;
+    case Screen::HowToPlay:
+        drawHowToPlay();
         break;
     case Screen::Playing:
         drawPlaying();
@@ -276,7 +318,7 @@ void Game::updateEveningSelect()
         selectedEvening = (selectedEvening + 1) % count;
     }
     if (IsKeyPressed(KEY_ENTER)) {
-        startRound();
+        screen = Screen::HowToPlay; // explain the evening before it starts
     }
     if (IsKeyPressed(KEY_ESCAPE)) {
         screen = Screen::Title; // to switch between Solo and Co-op
@@ -473,6 +515,56 @@ void Game::drawPlaying() const
 
     drawControlsHint();
     drawHud();
+}
+
+void Game::drawHowToPlay() const
+{
+    ClearBackground(NIGHT_SKY_COLOR);
+    const Evening& upcoming = evenings[selectedEvening];
+    drawCenteredText(upcoming.name.c_str(), 40, TITLE_SIZE, TITLE_COLOR);
+
+    // A little picture of the game, built from the real pieces so it looks
+    // exactly like what players are about to see: critters, the string with
+    // fireflies on it, and a lit lantern to carry them to.
+    Vector2 left = {290.0f, PICTURE_Y};
+    Vector2 right = {530.0f, PICTURE_Y};
+    Lantern lantern({700.0f, PICTURE_Y});
+    lantern.light(2); // a small glow, so it stays between the title and the steps
+    lantern.update(1.0f); // fully bloomed
+    lantern.draw();
+    BeginBlendMode(BLEND_ADDITIVE);
+    lantern.drawGlow();
+    DrawLineEx(left, right, 3.0f, PICTURE_STRING_COLOR);
+    for (float t : {0.3f, 0.5f, 0.7f}) {
+        CommonFirefly(Vector2Lerp(left, right, t)).draw();
+    }
+    EndBlendMode();
+    Critter(left, CRITTER1_COLOR, CRITTER1_KEYS).draw();
+    Critter(right, CRITTER2_COLOR, CRITTER2_KEYS).draw();
+    Vector2 arrowStart = {right.x + 40.0f, PICTURE_Y};
+    Vector2 arrowTip = {lantern.getPosition().x - 45.0f, PICTURE_Y};
+    DrawLineEx(arrowStart, arrowTip, 2.0f, PICTURE_ARROW_COLOR);
+    drawTriangleAnyOrder(arrowTip, {arrowTip.x - 10.0f, arrowTip.y - 6.0f},
+                         {arrowTip.x - 10.0f, arrowTip.y + 6.0f}, PICTURE_ARROW_COLOR);
+
+    const char* steps[] = {
+        solo ? "1. Steer both critters with both hands: WASD and the arrow keys"
+             : "1. One player uses WASD, the other the arrow keys",
+        "2. Brush the glowing string through fireflies to catch them",
+        "3. Carry them to a lantern and sweep the string across it to light it",
+        "4. Move together! Yanking or overstretching the string shakes fireflies off",
+        "5. Bigger loads shine brighter and score more. Light every lantern before dark",
+    };
+    for (int i = 0; i < 5; i++) {
+        drawCenteredText(steps[i], STEPS_TOP + i * STEP_SPACING, HUD_FONT_SIZE, TEXT_COLOR);
+    }
+
+    if (!upcoming.tip.empty()) {
+        drawCenteredText("Tonight", TIP_TOP, LINE_SIZE, TITLE_COLOR);
+        drawWrappedCenteredText(upcoming.tip, TIP_TOP + 34, HUD_FONT_SIZE, TIP_WIDTH, TITLE_COLOR);
+    }
+
+    drawCenteredText("Enter to start, Esc to go back", GetScreenHeight() - 40, HUD_FONT_SIZE, HINT_COLOR);
 }
 
 void Game::drawPaused() const

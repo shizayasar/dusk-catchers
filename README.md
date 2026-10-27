@@ -36,6 +36,7 @@ Write one setting per line: a keyword, then its numbers. Anything after `#` is a
 | Line | Meaning | Default |
 | --- | --- | --- |
 | `name First light` | The name shown on the evening-select screen. Required. | — |
+| `tip Shy fireflies dart away...` | This evening's new idea, shown on the how-to-play page before it starts. | none |
 | `length 180` | Seconds from sunset to full dark. | `180` |
 | `critters 320 270 640 270` | Where critter 1 and critter 2 start (x y x y). | `320 270 640 270` |
 | `fireflies 12` | How many fireflies are out at once. | `12` |

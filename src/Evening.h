@@ -19,6 +19,7 @@ public:
     bool loadFromFile(const std::string& path);
 
     std::string name;
+    std::string tip;                          // this evening's new idea, for the how-to-play page
     float length = 180.0f;                    // seconds from sunset to full dark
     Vector2 critter1Start = {320.0f, 270.0f};
     Vector2 critter2Start = {640.0f, 270.0f};

@@ -63,7 +63,7 @@ Co-op and solo use the same keys, so solo is simply one person steering both cri
 | Co-op, one keyboard | WASD | Arrow keys | Standard |
 | Solo, both hands | WASD | Arrow keys | Longer string, fireflies cling more tightly |
 
-The title screen offers Solo or Co-op. Enter starts a round; Esc pauses it, and from the pause screen Enter resumes and Q returns to evening select. For the first few seconds of each round, each critter's keys are shown beneath it and then fade out. Solo matters most for the portfolio, since most visitors will play alone.
+The title screen offers Solo or Co-op. Before each evening, a how-to-play page shows a little picture of the game, five short steps (controls, catch, carry and deliver, move together, the goal) and that evening's new idea, written as a `tip` line in its file. Enter starts the round; Esc pauses it, and from the pause screen Enter resumes and Q returns to evening select. For the first few seconds of each round, each critter's keys are shown beneath it and then fade out. Solo matters most for the portfolio, since most visitors will play alone.
 
 ## Look, feel and sound
 
@@ -83,7 +83,7 @@ The code is a handful of classes, each with `update(dt)` and `draw()`; there is 
 
 | Class | Count | Responsibilities |
 | --- | --- | --- |
-| `Game` | 1 | Owns every object. Loads each evening from data and keeps score. Each frame: input, then update, then draw. Switches screens: Title, Evening select, Playing, Results. |
+| `Game` | 1 | Owns every object. Loads each evening from data and keeps score. Each frame: input, then update, then draw. Switches screens: Title, Evening select, How to play, Playing, Paused, Results. |
 | `Critter` | 2 | Position and speed. Reads its own keys. |
 | `LightString` | 1 | The line between the two critters. Picks up fireflies it touches (line-vs-circle test), carries them, drops them if shaken, and delivers its load to a lantern. |
 | `Firefly` | many | Base class for every kind: drifting, clinging, riding the string and letting go. `CommonFirefly`, `ShyFirefly`, `PairFirefly` and `GoldenFirefly` override only what makes each kind different. |

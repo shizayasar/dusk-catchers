@@ -3,6 +3,7 @@
 # This time the meadow is on the right and the village on the left.
 
 name Partners
+tip Peach fireflies come in linked pairs and only cling if the string touches both at once. Line the string up with their link.
 critters 420 270 680 270
 meadow 380 40 540 460
 mix common 50 shy 20 pair 30

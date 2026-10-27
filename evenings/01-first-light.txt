@@ -3,6 +3,7 @@
 # Learn to gather and carry.
 
 name First light
+tip Brush the string through fireflies, then carry your load home to the village together.
 length 180                  # seconds from sunset to full dark
 critters 320 270 640 270    # where critter 1 and critter 2 start: x y x y
 fireflies 12                # how many are out in the meadow at once

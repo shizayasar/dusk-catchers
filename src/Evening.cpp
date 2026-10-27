@@ -44,6 +44,10 @@ bool Evening::readSetting(const std::string& key, std::istringstream& values)
         std::getline(values >> std::ws, name); // the rest of the line, spaces and all
         return !name.empty();
     }
+    if (key == "tip") {
+        std::getline(values >> std::ws, tip);
+        return !tip.empty();
+    }
     if (key == "length") {
         return static_cast<bool>(values >> length);
     }
