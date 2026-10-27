@@ -47,7 +47,7 @@ The game is a week of seven short evenings. Each one adds a single new idea, so 
 | 6. The footbridge | A narrow bridge over a stream | Cross single file, carefully |
 | 7. Festival night | Everything at once, plus golden fireflies | Light the big lantern in the town square |
 
-- **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit: one star for finishing, two for lighting at least half, three for lighting them all. Best stars are remembered while the game is open; saving them between sessions waits for the web build (milestone 8).
+- **Stars, not failure.** Each evening ends at full dark however you did, or early once every lantern is lit, and earns one to three stars for the lanterns you lit: one star for finishing, two for lighting at least half, three for lighting them all. Best stars are saved between sessions: in a small file on desktop and in the browser's local storage on the web.
 - **Obstacles.** Critters can't walk through trees, fences or water. If the string crosses a tree or fence it snags and fireflies start shaking loose, so both critters must go around the same side. Fireflies can't fly through trees or fences either; they can cross water but head for the nearest bank instead of lingering over it, and they keep a little distance from lanterns so catching one never lights a lantern by accident.
 - **Wind.** Every few seconds a gust blows, shown as streaks. It pushes both critters along and strains the string like a sail: a long string side-on to the wind strains most, a short one pointing into the wind barely at all.
 - **The big lantern.** Festival night's lantern in the town square only lights from a single delivery of at least 10 fireflies.
@@ -91,6 +91,7 @@ The code is a handful of classes, each with `update(dt)` and `draw()`; there is 
 | `Evening` | 7 | One evening's settings, read from a text file in `evenings/`. |
 | `Obstacle` | many | A tree, fence or water. Blocks critters; trees and fences snag the string. |
 | `Bridge` | few | Planks drawn over a gap in the water. |
+| `Progress` | — | Saves and loads best stars by evening name: a file on desktop, local storage in the browser. |
 | `Wind` | 1 | Gusts that push the critters and strain the string like a sail. |
 
 The string does most of the work: it reads the critters' positions, picks up any firefly it touches, drops them when shaken, and hands its load to a lantern.
@@ -115,7 +116,6 @@ Left out on purpose: online multiplayer, accounts, leaderboards, story, and any 
 **Later list**
 
 - Gamepad co-op: each gamepad's left stick moves one critter, and the title screen says "Press any button to join" (browsers only detect a gamepad after a button press).
-- Saving best stars between sessions (planned alongside the web build in milestone 8).
 
 The developer should be able to explain each of these in an interview:
 

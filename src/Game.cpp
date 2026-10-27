@@ -1,6 +1,7 @@
 #include "Game.h"
 
 #include <algorithm>
+#include <map>
 #include <cmath>
 #include <sstream>
 #include <string>
@@ -9,6 +10,7 @@
 #include "CommonFirefly.h"
 #include "GoldenFirefly.h"
 #include "PairFirefly.h"
+#include "Progress.h"
 #include "ShyFirefly.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -210,7 +212,15 @@ void Game::loadEvenings()
             evenings.push_back(loaded);
         }
     }
+    // Best stars saved from earlier sessions, matched up by evening name.
+    std::map<std::string, int> saved = Progress::load();
     bestStars.assign(evenings.size(), 0);
+    for (size_t i = 0; i < evenings.size(); i++) {
+        auto found = saved.find(evenings[i].name);
+        if (found != saved.end()) {
+            bestStars[i] = found->second;
+        }
+    }
 
     if (evenings.empty()) {
         TraceLog(LOG_ERROR, "GAME: No evenings found in \"%s\"; run the game from the project folder",
@@ -356,7 +366,17 @@ void Game::startRound()
 
 void Game::finishRound()
 {
-    bestStars[selectedEvening] = std::max(bestStars[selectedEvening], starsEarned());
+    if (starsEarned() > bestStars[selectedEvening]) {
+        bestStars[selectedEvening] = starsEarned();
+
+        std::map<std::string, int> toSave;
+        for (size_t i = 0; i < evenings.size(); i++) {
+            if (bestStars[i] > 0) {
+                toSave[evenings[i].name] = bestStars[i];
+            }
+        }
+        Progress::save(toSave);
+    }
     screen = Screen::Results;
 }
 

@@ -49,7 +49,7 @@ private:
     int starsEarned() const;
 
     std::vector<Evening> evenings;  // every evening found in the evenings folder
-    std::vector<int> bestStars;     // best stars so far for each evening (0 = not played)
+    std::vector<int> bestStars;     // best stars for each evening, saved between sessions (0 = not played)
     int selectedEvening;            // index into evenings
     bool solo;                      // one player steering both critters
     std::vector<std::unique_ptr<Firefly>> titleFireflies; // drifting behind the title

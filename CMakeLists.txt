@@ -33,6 +33,7 @@ add_executable(dusk_catchers
     src/Bridge.cpp
     src/Particles.cpp
     src/Audio.cpp
+    src/Progress.cpp
 )
 target_link_libraries(dusk_catchers PRIVATE raylib)
 
